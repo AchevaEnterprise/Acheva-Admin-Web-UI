@@ -1,0 +1,94 @@
+<div class="adm-page-head">
+  <div>
+    <h2 class="acva-heading-5 fw-600 m-0">Settings</h2>
+    <p class="acva-para-1 text-neutral-500 m-0">
+      Control the active academic session — every portal inherits it.
+    </p>
+  </div>
+</div>
+
+<section class="adm-card" style="max-width: 620px">
+  <label class="acva-caption text-neutral-500" for="set-school">School</label><br />
+  <select id="set-school" class="adm-select mt-1 mb-4" (change)="onSchoolChange($event)">
+    @for (school of schools(); track school._id) {
+      <option [value]="school._id" [selected]="school._id === selectedSchoolId()">
+        {{ school.name }}
+      </option>
+    }
+  </select>
+
+  @if (current(); as settings) {
+    <p class="acva-para-1 mb-4" style="background: #e8f3ff; color: #134980; padding: 12px 16px; border-radius: 8px">
+      Current: <strong>{{ settings.activeSession }}</strong> · {{ settings.activeSemester }}
+      · {{ settings.registrationGraceDays }}-day student edit window
+    </p>
+  } @else {
+    <p class="acva-para-1 mb-4" style="background: #fef3c7; color: #92400e; padding: 12px 16px; border-radius: 8px">
+      No active session configured yet — registration cannot run until one is set.
+    </p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <label class="acva-caption text-neutral-500" for="set-session">Active session</label><br />
+    <input
+      id="set-session"
+      class="adm-input mt-1 mb-4"
+      formControlName="activeSession"
+      placeholder="2026/2027"
+    />
+    <br />
+
+    <span class="acva-caption text-neutral-500">Active semester</span><br />
+    <span style="display: inline-flex; gap: 8px" class="mt-1 mb-4">
+      @for (semester of semesters; track semester) {
+        <button
+          type="button"
+          class="adm-btn"
+          [class.adm-btn--outline]="form.controls.activeSemester.value !== semester"
+          (click)="setSemester(semester)"
+        >
+          {{ semester }}
+        </button>
+      }
+    </span>
+    <br />
+
+    <label class="acva-caption text-neutral-500" for="set-grace">
+      Student self-edit window (days after auto-registration)
+    </label><br />
+    <input
+      id="set-grace"
+      class="adm-input mt-1"
+      style="width: 120px"
+      type="number"
+      min="0"
+      max="365"
+      formControlName="registrationGraceDays"
+    />
+
+    <div class="mt-6">
+      <button type="submit" class="adm-btn" [disabled]="saving()">
+        {{ saving() ? 'Saving…' : 'Save session settings' }}
+      </button>
+    </div>
+  </form>
+</section>
+
+<section class="adm-card mt-6" style="max-width: 620px; border-left: 3px solid #f59e0b">
+  <h3 class="acva-para-2 fw-600 m-0">Advance academic session</h3>
+  <p class="acva-para-1 text-neutral-500">
+    Run this once, when a new session begins: students are promoted one level
+    (up to their department's final level), Course Advisor cohorts are
+    remapped, and the active session moves to
+    <strong>{{ nextSession() || '—' }}</strong>. Nothing on the platform does
+    this automatically.
+  </p>
+  <button
+    type="button"
+    class="adm-btn"
+    [disabled]="rollingOver() || !current()"
+    (click)="rollover()"
+  >
+    {{ rollingOver() ? 'Advancing…' : 'Advance to ' + (nextSession() || 'next session') }}
+  </button>
+</section>

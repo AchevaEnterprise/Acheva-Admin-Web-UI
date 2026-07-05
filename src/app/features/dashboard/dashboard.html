@@ -1,0 +1,54 @@
+<div class="adm-page-head">
+  <div>
+    <h2 class="acva-heading-5 fw-600 m-0">Dashboard Overview</h2>
+    <p class="acva-para-1 text-neutral-500 m-0">
+      Detailed statistics and latest activity from all connected institutions.
+    </p>
+  </div>
+</div>
+
+<!-- Stat cards -->
+<div class="dash-grid">
+  @for (card of cards(); track card.label) {
+    <div class="adm-card dash-stat">
+      <div class="dash-stat__top">
+        <span class="acva-para-1 text-neutral-500">{{ card.label }}</span>
+        <span class="dash-stat__icon">{{ card.icon }}</span>
+      </div>
+      <p class="dash-stat__value">{{ card.value }}</p>
+      <p class="acva-caption text-neutral-500 m-0">ⓘ {{ card.caption }}</p>
+    </div>
+  }
+</div>
+
+<!-- Quick actions -->
+<section class="adm-card mt-6">
+  <h3 class="acva-para-2 fw-600 m-0 mb-4">🗂️ Quick Actions</h3>
+  <div class="dash-actions">
+    <button type="button" class="dash-action" (click)="createSchool()">
+      <span class="dash-action__icon">🏛️</span>
+      <span>Create School</span>
+    </button>
+    <button type="button" class="dash-action" (click)="createCourse()">
+      <span class="dash-action__icon">📘</span>
+      <span>Create Course</span>
+    </button>
+    <button type="button" class="dash-action" (click)="createFaculty()">
+      <span class="dash-action__icon">🏫</span>
+      <span>Create Faculty</span>
+    </button>
+    <button type="button" class="dash-action" (click)="createDepartment()">
+      <span class="dash-action__icon">🗄️</span>
+      <span>Create Department</span>
+    </button>
+  </div>
+</section>
+
+<!-- Activity placeholder until the audit-log backend exists -->
+<section class="adm-card mt-6">
+  <h3 class="acva-para-2 fw-600 m-0 mb-2">🕘 Recent Activity &amp; Logs</h3>
+  <p class="adm-empty">
+    Platform audit logs arrive with the Logs round — actions here are already
+    recorded per-feature (workflow history, decision traces, import reports).
+  </p>
+</section>

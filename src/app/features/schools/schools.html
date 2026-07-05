@@ -1,0 +1,93 @@
+<div class="adm-page-head">
+  <div>
+    <h2 class="acva-heading-5 fw-600 m-0">School Management</h2>
+    <p class="acva-para-1 text-neutral-500 m-0">
+      Add, update, and manage all registered educational institutions.
+    </p>
+  </div>
+  <button type="button" class="adm-btn" (click)="create()">＋ Create School</button>
+</div>
+
+<section class="adm-card">
+  <label class="acva-caption text-neutral-500" for="school-search">Search</label>
+  <input
+    id="school-search"
+    type="text"
+    class="adm-input w-full mt-1 mb-4"
+    placeholder="Search school"
+    (input)="onSearch($event)"
+  />
+
+  @if (loading()) {
+    <p class="adm-empty">Loading schools…</p>
+  } @else if (filtered().length === 0) {
+    <p class="adm-empty">No schools found.</p>
+  } @else {
+    <div style="overflow-x: auto">
+      <table class="adm-table">
+        <thead>
+          <tr>
+            <th>School</th>
+            <th>Total Students</th>
+            <th>Total Lecturers</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (school of filtered(); track school._id) {
+            <tr>
+              <td>
+                <span class="fw-600">{{ school.name }}</span>
+                <br />
+                <span class="acva-caption text-neutral-500">
+                  {{ school.acronym || school.address || 'Institution' }}
+                </span>
+              </td>
+              <td>{{ school.totalStudents ?? 0 }}</td>
+              <td>{{ school.totalLecturers ?? 0 }}</td>
+              <td>
+                <span
+                  class="adm-chip"
+                  [class.adm-chip--active]="school.isActive !== false"
+                  [class.adm-chip--disabled]="school.isActive === false"
+                >
+                  {{ school.isActive === false ? 'Disabled' : 'Active' }}
+                </span>
+              </td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 8px">
+                  <button
+                    type="button"
+                    class="adm-icon-btn"
+                    aria-label="Edit school"
+                    (click)="edit(school)"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    type="button"
+                    class="adm-toggle"
+                    [class.adm-toggle--on]="school.isActive !== false"
+                    [attr.aria-label]="
+                      school.isActive === false ? 'Enable school' : 'Disable school'
+                    "
+                    (click)="toggle(school)"
+                  ></button>
+                  <button
+                    type="button"
+                    class="adm-icon-btn"
+                    aria-label="Delete school"
+                    (click)="remove(school)"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

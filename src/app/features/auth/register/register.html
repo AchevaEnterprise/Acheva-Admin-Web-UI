@@ -1,0 +1,42 @@
+<div class="login-shell">
+  <form class="login-card" [formGroup]="form" (ngSubmit)="submit()">
+    <h1 class="acva-heading-6 fw-600">Join Acheva Admin</h1>
+    @if (token()) {
+      <p class="acva-para-1 text-neutral-500">
+        You've been invited — complete your account to get started.
+      </p>
+    } @else {
+      <p class="acva-para-1" style="color: #b91c1c">
+        This page needs a valid invite link. Ask an admin to invite you.
+      </p>
+    }
+
+    <label class="login-card__field">
+      <span>First name</span>
+      <input type="text" formControlName="firstname" />
+    </label>
+    <label class="login-card__field">
+      <span>Last name</span>
+      <input type="text" formControlName="lastname" />
+    </label>
+    <label class="login-card__field">
+      <span>Email</span>
+      <input type="email" formControlName="email" />
+    </label>
+    <label class="login-card__field">
+      <span>Password</span>
+      <input type="password" formControlName="password" autocomplete="new-password" />
+      <span class="acva-caption text-neutral-500">
+        8+ characters with an uppercase letter, number and symbol.
+      </span>
+    </label>
+    <label class="login-card__field">
+      <span>Confirm password</span>
+      <input type="password" formControlName="confirmPassword" autocomplete="new-password" />
+    </label>
+
+    <button type="submit" class="login-card__submit" [disabled]="loading() || !token()">
+      {{ loading() ? 'Creating account…' : 'Create account' }}
+    </button>
+  </form>
+</div>

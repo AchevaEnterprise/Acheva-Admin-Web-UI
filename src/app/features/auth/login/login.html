@@ -1,0 +1,23 @@
+<div class="login-shell">
+  <form class="login-card" [formGroup]="form" (ngSubmit)="submit()">
+    <img src="images/logo.svg" alt="Acheva" class="login-card__logo" onerror="this.style.display='none'" />
+    <h1 class="acva-heading-6 fw-600">Admin Sign in</h1>
+    <p class="acva-para-1 text-neutral-500">
+      Manage schools, catalogues and academic sessions.
+    </p>
+
+    <label class="login-card__field">
+      <span>Email</span>
+      <input type="email" formControlName="email" placeholder="members@acheva.app" autocomplete="username" />
+    </label>
+
+    <label class="login-card__field">
+      <span>Password</span>
+      <input type="password" formControlName="password" placeholder="••••••••" autocomplete="current-password" />
+    </label>
+
+    <button type="submit" class="login-card__submit" [disabled]="loading()">
+      {{ loading() ? 'Signing in…' : 'Sign in' }}
+    </button>
+  </form>
+</div>

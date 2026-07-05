@@ -1,0 +1,16 @@
+@use '@angular/material' as mat;
+
+:root {
+  @include mat.paginator-overrides(
+    (
+      container-background-color: 'transparent',
+      form-field-container-height: '35px',
+    )
+  );
+}
+
+mat-paginator {
+  .mat-mdc-text-field-wrapper {
+    padding-inline: 10px !important;
+  }
+}

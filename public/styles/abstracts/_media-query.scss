@@ -1,0 +1,47 @@
+@use 'sass:map';
+
+$min-width-breakpoints: (
+  acva-sm: 576px,
+  acva-md: 768px,
+  acva-lg: 992px,
+  acva-xl: 1200px,
+  acva-xxl: 1400px,
+);
+$max-width-breakpoints: (
+  acva-xsm: 575.98px,
+  acva-sm: 767.98px,
+  acva-md: 991.98px,
+  acva-lg: 1199.98px,
+  acva-xl: 1399.98px,
+);
+
+@mixin acva-media-query-min($key) {
+  $size: map.get($min-width-breakpoints, $key);
+
+  @media only screen and (min-width: $size) {
+    @content;
+  }
+}
+
+@mixin acva-media-query-max($key) {
+  $size: map.get($max-width-breakpoints, $key);
+
+  @media only screen and (max-width: $size) {
+    @content;
+  }
+}
+
+@mixin acva-media-query-between($key1, $key2) {
+  $max: map.get($max-width-breakpoints, $key1);
+  $min: map.get($min-width-breakpoints, $key2);
+
+  @media only screen and (max-width: $max) and (min-width: $min) {
+    @content;
+  }
+}
+
+@mixin acva-media-query-between-normal($key1, $key2) {
+  @media only screen and (max-width: $key1) and (min-width: $key2) {
+    @content;
+  }
+}

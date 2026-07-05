@@ -1,0 +1,127 @@
+.shell {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  min-height: 100dvh;
+  background: #f5f7fa;
+
+  &__sidebar {
+    background: #fff;
+    border-right: 1px solid #e5e7eb;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    overflow-y: auto;
+  }
+
+  &__logo {
+    width: 44px;
+    margin-left: 8px;
+  }
+
+  &__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 16px;
+    border-radius: 10px;
+    color: #374151;
+    font-size: 0.9rem;
+    text-decoration: none;
+
+    &:hover {
+      background: #f3f4f6;
+    }
+
+    &--active {
+      background: linear-gradient(90deg, #2793ff, #77bbff);
+      color: #fff;
+      font-weight: 600;
+    }
+  }
+
+  &__logout {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: none;
+    border: none;
+    padding: 10px 16px;
+    font: inherit;
+    color: #374151;
+    cursor: pointer;
+    text-align: left;
+
+    &:hover {
+      color: #b91c1c;
+    }
+  }
+
+  &__plane {
+    border-radius: 16px;
+    background: linear-gradient(135deg, #2793ff, #77bbff);
+    padding: 32px;
+    display: grid;
+    place-items: center;
+
+    img {
+      width: 64px;
+    }
+  }
+
+  &__main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__topbar {
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+
+  &__profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__bell {
+    font-size: 1.1rem;
+    opacity: 0.7;
+  }
+
+  &__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e8f3ff;
+    color: #134980;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+  }
+
+  &__content {
+    padding: 32px;
+    flex: 1;
+    min-width: 0;
+  }
+}

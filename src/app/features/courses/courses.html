@@ -1,0 +1,166 @@
+<div class="adm-page-head">
+  <div>
+    <h2 class="acva-heading-5 fw-600 m-0">Courses &amp; Curriculum</h2>
+    <p class="acva-para-1 text-neutral-500 m-0">
+      The university catalogue — what each department's students take, per level and semester.
+    </p>
+  </div>
+  <div style="display: flex; gap: 12px; flex-wrap: wrap">
+    <button type="button" class="adm-btn adm-btn--outline" (click)="downloadTemplate()">
+      Template
+    </button>
+    <label class="adm-btn adm-btn--outline" style="cursor: pointer">
+      {{ importing() ? 'Importing…' : 'Import curriculum' }}
+      <input type="file" accept=".xlsx,.csv" hidden (change)="onImportFile($event)" [disabled]="importing()" />
+    </label>
+    <button type="button" class="adm-btn" (click)="createCourse()">＋ Create Course</button>
+  </div>
+</div>
+
+<section class="adm-card">
+  <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end" class="mb-4">
+    <div>
+      <label class="acva-caption text-neutral-500" for="cur-school">School</label><br />
+      <select id="cur-school" class="adm-select mt-1" (change)="onSchoolChange($event)">
+        @for (school of schools(); track school._id) {
+          <option [value]="school._id" [selected]="school._id === selectedSchoolId()">{{ school.name }}</option>
+        }
+      </select>
+    </div>
+    <div>
+      <label class="acva-caption text-neutral-500" for="cur-dept">Department</label><br />
+      <select id="cur-dept" class="adm-select mt-1" (change)="onDepartmentChange($event)">
+        @for (department of departments(); track department._id) {
+          <option [value]="department._id" [selected]="department._id === selectedDepartmentId()">
+            {{ department.name }}
+          </option>
+        }
+      </select>
+    </div>
+    <div>
+      <span class="acva-caption text-neutral-500">Level</span><br />
+      <span style="display: inline-flex; gap: 6px" class="mt-1">
+        @for (level of levels; track level) {
+          <button
+            type="button"
+            class="adm-btn"
+            [class.adm-btn--outline]="selectedLevel() !== level"
+            style="padding: 8px 14px"
+            (click)="setLevel(level)"
+          >
+            {{ level }}
+          </button>
+        }
+      </span>
+    </div>
+    <div>
+      <span class="acva-caption text-neutral-500">Semester</span><br />
+      <span style="display: inline-flex; gap: 6px" class="mt-1">
+        @for (semester of semesters; track semester) {
+          <button
+            type="button"
+            class="adm-btn"
+            [class.adm-btn--outline]="selectedSemester() !== semester"
+            style="padding: 8px 14px"
+            (click)="setSemester(semester)"
+          >
+            {{ semester === '1ST SEMESTER' ? '1st' : '2nd' }}
+          </button>
+        }
+      </span>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <p class="adm-empty">Loading curriculum…</p>
+  } @else if (rows().length === 0) {
+    <p class="adm-empty">
+      No curriculum for this block yet — import the department's course list.
+    </p>
+  } @else {
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap" class="mb-2">
+      <p class="acva-caption text-neutral-500 m-0">
+        {{ rows().length }} course(s) · {{ totalUnits() }} units offered
+      </p>
+      <span style="display: inline-flex; align-items: center; gap: 8px">
+        <label class="acva-caption text-neutral-500" for="block-min">
+          Minimum load for this semester
+        </label>
+        <input
+          id="block-min"
+          class="adm-input"
+          style="width: 80px; padding: 6px 10px"
+          type="number"
+          min="0"
+          max="30"
+          [value]="blockMinUnits()"
+          (input)="onBlockMinInput($event)"
+        />
+        <button
+          type="button"
+          class="adm-btn adm-btn--outline"
+          style="padding: 6px 14px"
+          [disabled]="savingBlockMin()"
+          (click)="saveBlockMin()"
+        >
+          Save
+        </button>
+      </span>
+    </div>
+    <div style="overflow-x: auto">
+      <table class="adm-table">
+        <thead>
+          <tr>
+            <th>Code</th><th>Title</th><th>Units</th><th>Type</th><th>Elective Group</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row._id) {
+            <tr>
+              <td class="fw-600">{{ row.course.courseCode }}</td>
+              <td>{{ row.course.courseTitle }}</td>
+              <td>{{ row.units }}</td>
+              <td>
+                <span
+                  class="adm-chip"
+                  [class.adm-chip--blue]="row.courseType === 'COMPULSORY'"
+                  [class.adm-chip--purple]="row.courseType === 'ELECTIVE'"
+                  [class.adm-chip--grey]="row.courseType === 'SIWES'"
+                >
+                  {{ row.courseType }}
+                </span>
+              </td>
+              <td>{{ row.electiveGroup || '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+@if (report(); as importReport) {
+  <section class="adm-card mt-4">
+    <h3 class="acva-para-2 fw-600 m-0">Last import report</h3>
+    <p class="acva-para-1 text-neutral-500">
+      {{ importReport.rowsReceived }} rows · {{ importReport.entriesCreated }} created ·
+      {{ importReport.entriesUpdated }} updated · {{ importReport.coursesCreated }} new courses
+    </p>
+    @if (importReport.rowErrors.length > 0) {
+      <p class="acva-para-1 fw-600" style="color: #b91c1c">Row errors</p>
+      <ul class="acva-para-1" style="color: #b91c1c">
+        @for (error of importReport.rowErrors; track $index) {
+          <li>{{ error }}</li>
+        }
+      </ul>
+    }
+    @if (importReport.blockIssues.length > 0) {
+      <p class="acva-para-1 fw-600" style="color: #92400e">Policy issues</p>
+      <ul class="acva-para-1" style="color: #92400e">
+        @for (issue of importReport.blockIssues; track $index) {
+          <li>{{ issue.department }} {{ issue.level }} {{ issue.semester }} — {{ issue.issue }}</li>
+        }
+      </ul>
+    }
+  </section>
+}

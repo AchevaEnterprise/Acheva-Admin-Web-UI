@@ -1,0 +1,15 @@
+@use '@angular/material' as mat;
+
+:root {
+  @include mat.snack-bar-overrides(
+    (
+      container-color: #fff,
+      container-shape: '20px',
+    )
+  );
+}
+
+.mat-mdc-snack-bar-container .mat-mdc-snackbar-surface {
+  overflow: hidden;
+  max-width: 45% !important;
+}

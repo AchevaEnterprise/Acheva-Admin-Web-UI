@@ -1,0 +1,31 @@
+.acheva-logo-container {
+  position: absolute;
+  background: transparent;
+  top: 1rem;
+  left: 4.1662rem;
+  width: 9.875rem;
+  height: 4.75rem;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0.2rem;
+  z-index: 3;
+
+  .company-logo-name {
+    animation: slide-in-from-left 0.9s ease;
+  }
+}
+
+@keyframes slide-in-from-left {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

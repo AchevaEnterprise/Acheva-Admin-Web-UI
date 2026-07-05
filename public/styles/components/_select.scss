@@ -1,0 +1,16 @@
+@use '@angular/material' as mat;
+
+:root {
+  @include mat.select-overrides(
+    (
+      panel-background-color: #fff,
+      placeholder-text-color: #b4b3b2,
+    )
+  );
+}
+
+.mat-mdc-option {
+  min-height: 39px !important;
+
+  --mat-option-label-text-size: 13px !important;
+}

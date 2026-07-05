@@ -1,0 +1,44 @@
+<div class="shell">
+  <aside class="shell__sidebar">
+    <img src="icons/logos/logo.svg" alt="Acheva" class="shell__logo" onerror="this.src='icons/menu/plane.svg'" />
+
+    <nav class="shell__nav">
+      @for (item of nav; track item.route) {
+        <a
+          class="shell__item"
+          [routerLink]="item.route"
+          routerLinkActive="shell__item--active"
+          #rla="routerLinkActive"
+        >
+          <img [src]="rla.isActive ? item.activeIcon : item.inactiveIcon" alt="" width="20" height="20" />
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <button type="button" class="shell__logout" (click)="logout()">
+      <span aria-hidden="true">↩</span> Logout
+    </button>
+    <div class="shell__plane">
+      <img src="icons/menu/plane.svg" alt="" />
+    </div>
+  </aside>
+
+  <div class="shell__main">
+    <header class="shell__topbar">
+      <span class="acva-para-2 fw-600">Acheva</span>
+      <div class="shell__profile">
+        <span class="shell__bell" aria-hidden="true">🔔</span>
+        <div class="shell__avatar">{{ fullName().charAt(0) || 'A' }}</div>
+        <div>
+          <p class="acva-para-1 fw-600 m-0">{{ fullName() }}</p>
+          <p class="acva-caption text-neutral-500 m-0">Super Admin</p>
+        </div>
+      </div>
+    </header>
+
+    <main class="shell__content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

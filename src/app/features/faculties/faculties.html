@@ -1,0 +1,45 @@
+<div class="adm-page-head">
+  <div>
+    <h2 class="acva-heading-5 fw-600 m-0">Faculty Management</h2>
+    <p class="acva-para-1 text-neutral-500 m-0">
+      Faculties group the departments of an institution.
+    </p>
+  </div>
+  <button type="button" class="adm-btn" (click)="create()">＋ Create Faculty</button>
+</div>
+
+<section class="adm-card">
+  <label class="acva-caption text-neutral-500" for="fac-school">School</label>
+  <br />
+  <select id="fac-school" class="adm-select mt-1 mb-4" (change)="onSchoolChange($event)">
+    @for (school of schools(); track school._id) {
+      <option [value]="school._id" [selected]="school._id === selectedSchoolId()">
+        {{ school.name }}
+      </option>
+    }
+  </select>
+
+  @if (loading()) {
+    <p class="adm-empty">Loading faculties…</p>
+  } @else if (faculties().length === 0) {
+    <p class="adm-empty">No faculties yet — create the first one.</p>
+  } @else {
+    <table class="adm-table">
+      <thead>
+        <tr><th>Name</th><th>Code</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        @for (faculty of faculties(); track faculty._id) {
+          <tr>
+            <td class="fw-600">{{ faculty.name }}</td>
+            <td>{{ faculty.code || '—' }}</td>
+            <td>
+              <button type="button" class="adm-icon-btn" aria-label="Edit faculty" (click)="edit(faculty)">✏️</button>
+              <button type="button" class="adm-icon-btn" aria-label="Delete faculty" (click)="remove(faculty)">🗑️</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>

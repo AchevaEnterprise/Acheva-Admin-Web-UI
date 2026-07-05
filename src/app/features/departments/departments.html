@@ -1,0 +1,58 @@
+<div class="adm-page-head">
+  <div>
+    <h2 class="acva-heading-5 fw-600 m-0">Department Management</h2>
+    <p class="acva-para-1 text-neutral-500 m-0">
+      Departments own courses, curricula and student cohorts.
+    </p>
+  </div>
+  <button type="button" class="adm-btn" (click)="create()">＋ Create Department</button>
+</div>
+
+<section class="adm-card">
+  <div style="display: flex; gap: 16px; flex-wrap: wrap" class="mb-4">
+    <div>
+      <label class="acva-caption text-neutral-500" for="dep-school">School</label><br />
+      <select id="dep-school" class="adm-select mt-1" (change)="onSchoolChange($event)">
+        @for (school of schools(); track school._id) {
+          <option [value]="school._id" [selected]="school._id === selectedSchoolId()">
+            {{ school.name }}
+          </option>
+        }
+      </select>
+    </div>
+    <div>
+      <label class="acva-caption text-neutral-500" for="dep-faculty">Faculty</label><br />
+      <select id="dep-faculty" class="adm-select mt-1" (change)="onFacultyChange($event)">
+        @for (faculty of faculties(); track faculty._id) {
+          <option [value]="faculty._id" [selected]="faculty._id === selectedFacultyId()">
+            {{ faculty.name }}
+          </option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <p class="adm-empty">Loading departments…</p>
+  } @else if (departments().length === 0) {
+    <p class="adm-empty">No departments in this faculty yet.</p>
+  } @else {
+    <table class="adm-table">
+      <thead>
+        <tr><th>Name</th><th>Code</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        @for (department of departments(); track department._id) {
+          <tr>
+            <td class="fw-600">{{ department.name }}</td>
+            <td>{{ department.code || '—' }}</td>
+            <td>
+              <button type="button" class="adm-icon-btn" aria-label="Edit department" (click)="edit(department)">✏️</button>
+              <button type="button" class="adm-icon-btn" aria-label="Delete department" (click)="remove(department)">🗑️</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>

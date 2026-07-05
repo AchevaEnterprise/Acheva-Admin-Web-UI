@@ -1,0 +1,20 @@
+@use '@angular/material' as mat;
+
+:root {
+  @include mat.table-overrides(
+    (
+      background-color: transparent,
+      header-headline-color: oklch(55.6% 0 0),
+      header-headline-size: '11px',
+      header-container-height: '35px',
+      header-headline-weight: 500,
+      row-item-outline-color: #d9e1ec,
+      row-item-label-text-size: '13px',
+      row-item-label-text-weight: 400,
+    )
+  );
+}
+
+.mat-mdc-header-row {
+  background: #d2d2d2 !important;
+}
