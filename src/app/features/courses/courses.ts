@@ -16,6 +16,8 @@ import {
   MatDialog,
   MatDialogRef,
 } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { finalize } from 'rxjs';
 import { LEVELS, SEMESTERS } from '../../core/constants';
 import {
@@ -38,7 +40,7 @@ interface ICourseDialogContext {
   selector: 'app-course-dialog',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, MatFormFieldModule, MatSelectModule],
   template: `
     <form class="adm-dialog" [formGroup]="form" (ngSubmit)="save()">
       <h2>Create Course</h2>
@@ -46,12 +48,13 @@ interface ICourseDialogContext {
 
       <label>
         Semester
-        <select class="adm-select" formControlName="semester">
-          <option value="" disabled>Choose a semester</option>
-          @for (semester of semesters; track semester) {
-            <option [value]="semester">{{ semester }}</option>
-          }
-        </select>
+        <mat-form-field appearance="outline" class="adm-mat">
+          <mat-select formControlName="semester" placeholder="Choose a semester">
+            @for (semester of semesters; track semester) {
+              <mat-option [value]="semester">{{ semester }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
       </label>
 
       <label>
@@ -66,42 +69,46 @@ interface ICourseDialogContext {
 
       <label>
         School
-        <select class="adm-select" formControlName="school" (change)="onSchool()">
-          <option value="" disabled>Choose a School</option>
-          @for (school of context.schools; track school._id) {
-            <option [value]="school._id">{{ school.name }}</option>
-          }
-        </select>
+        <mat-form-field appearance="outline" class="adm-mat">
+          <mat-select formControlName="school" placeholder="Choose a School" (selectionChange)="onSchool()">
+            @for (school of context.schools; track school._id) {
+              <mat-option [value]="school._id">{{ school.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
       </label>
 
       <label>
         Faculty
-        <select class="adm-select" formControlName="faculty" (change)="onFaculty()">
-          <option value="" disabled>Choose a faculty</option>
-          @for (faculty of faculties(); track faculty._id) {
-            <option [value]="faculty._id">{{ faculty.name }}</option>
-          }
-        </select>
+        <mat-form-field appearance="outline" class="adm-mat">
+          <mat-select formControlName="faculty" placeholder="Choose a faculty" (selectionChange)="onFaculty()">
+            @for (faculty of faculties(); track faculty._id) {
+              <mat-option [value]="faculty._id">{{ faculty.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
       </label>
 
       <label>
         Department
-        <select class="adm-select" formControlName="department">
-          <option value="" disabled>Choose a department</option>
-          @for (department of departments(); track department._id) {
-            <option [value]="department._id">{{ department.name }}</option>
-          }
-        </select>
+        <mat-form-field appearance="outline" class="adm-mat">
+          <mat-select formControlName="department" placeholder="Choose a department">
+            @for (department of departments(); track department._id) {
+              <mat-option [value]="department._id">{{ department.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
       </label>
 
       <label>
         Level
-        <select class="adm-select" formControlName="level">
-          <option value="" disabled>Choose a Level</option>
-          @for (level of levels; track level) {
-            <option [value]="level">{{ level }}</option>
-          }
-        </select>
+        <mat-form-field appearance="outline" class="adm-mat">
+          <mat-select formControlName="level" placeholder="Choose a Level">
+            @for (level of levels; track level) {
+              <mat-option [value]="level">{{ level }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
       </label>
 
       <label>
@@ -122,11 +129,13 @@ interface ICourseDialogContext {
 
       <label>
         Classification (in the department's curriculum)
-        <select class="adm-select" formControlName="classification">
-          <option value="COMPULSORY">COMPULSORY</option>
-          <option value="ELECTIVE">ELECTIVE</option>
-          <option value="SIWES">SIWES</option>
-        </select>
+        <mat-form-field appearance="outline" class="adm-mat">
+          <mat-select formControlName="classification">
+            <mat-option value="COMPULSORY">COMPULSORY</mat-option>
+            <mat-option value="ELECTIVE">ELECTIVE</mat-option>
+            <mat-option value="SIWES">SIWES</mat-option>
+          </mat-select>
+        </mat-form-field>
       </label>
 
       @if (form.controls.classification.value === 'ELECTIVE') {
@@ -216,6 +225,7 @@ export class CourseDialog {
   selector: 'app-courses',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [MatFormFieldModule, MatSelectModule],
   templateUrl: './courses.html',
 })
 export class Courses implements OnInit {
@@ -278,15 +288,15 @@ export class Courses implements OnInit {
     });
   }
 
-  onSchoolChange(event: Event): void {
-    this.selectedSchoolId.set((event.target as HTMLSelectElement).value);
+  onSchoolChange(schoolId: string): void {
+    this.selectedSchoolId.set(schoolId);
     this.selectedDepartmentId.set('');
     this.rows.set([]);
     this.loadDepartments();
   }
 
-  onDepartmentChange(event: Event): void {
-    this.selectedDepartmentId.set((event.target as HTMLSelectElement).value);
+  onDepartmentChange(departmentId: string): void {
+    this.selectedDepartmentId.set(departmentId);
     this.load();
   }
 

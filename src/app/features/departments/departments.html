@@ -9,26 +9,34 @@
 </div>
 
 <section class="adm-card">
-  <div style="display: flex; gap: 16px; flex-wrap: wrap" class="mb-4">
-    <div>
-      <label class="acva-caption text-neutral-500" for="dep-school">School</label><br />
-      <select id="dep-school" class="adm-select mt-1" (change)="onSchoolChange($event)">
-        @for (school of schools(); track school._id) {
-          <option [value]="school._id" [selected]="school._id === selectedSchoolId()">
-            {{ school.name }}
-          </option>
-        }
-      </select>
+  <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end" class="mb-4">
+    <div class="adm-field adm-field--inline" style="margin-bottom: 0">
+      <label class="adm-field__label" for="dep-school">School</label>
+      <mat-form-field appearance="outline" class="adm-mat adm-mat--inline">
+        <mat-select
+          id="dep-school"
+          [value]="selectedSchoolId()"
+          (selectionChange)="onSchoolChange($event.value)"
+        >
+          @for (school of schools(); track school._id) {
+            <mat-option [value]="school._id">{{ school.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
     </div>
-    <div>
-      <label class="acva-caption text-neutral-500" for="dep-faculty">Faculty</label><br />
-      <select id="dep-faculty" class="adm-select mt-1" (change)="onFacultyChange($event)">
-        @for (faculty of faculties(); track faculty._id) {
-          <option [value]="faculty._id" [selected]="faculty._id === selectedFacultyId()">
-            {{ faculty.name }}
-          </option>
-        }
-      </select>
+    <div class="adm-field adm-field--inline" style="margin-bottom: 0">
+      <label class="adm-field__label" for="dep-faculty">Faculty</label>
+      <mat-form-field appearance="outline" class="adm-mat adm-mat--inline">
+        <mat-select
+          id="dep-faculty"
+          [value]="selectedFacultyId()"
+          (selectionChange)="onFacultyChange($event.value)"
+        >
+          @for (faculty of faculties(); track faculty._id) {
+            <mat-option [value]="faculty._id">{{ faculty.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
     </div>
   </div>
 
@@ -39,7 +47,7 @@
   } @else {
     <table class="adm-table">
       <thead>
-        <tr><th>Name</th><th>Code</th><th>Action</th></tr>
+        <tr><th>Name</th><th>Code</th><th>Status</th><th>Action</th></tr>
       </thead>
       <tbody>
         @for (department of departments(); track department._id) {
@@ -47,8 +55,23 @@
             <td class="fw-600">{{ department.name }}</td>
             <td>{{ department.code || '—' }}</td>
             <td>
+              <span
+                class="adm-chip"
+                [class.adm-chip--active]="department.isActive !== false"
+                [class.adm-chip--disabled]="department.isActive === false"
+              >
+                {{ department.isActive === false ? 'Disabled' : 'Active' }}
+              </span>
+            </td>
+            <td>
               <button type="button" class="adm-icon-btn" aria-label="Edit department" (click)="edit(department)">✏️</button>
-              <button type="button" class="adm-icon-btn" aria-label="Delete department" (click)="remove(department)">🗑️</button>
+              <button
+                type="button"
+                class="adm-toggle"
+                [class.adm-toggle--on]="department.isActive !== false"
+                [attr.aria-label]="department.isActive === false ? 'Enable department' : 'Disable department'"
+                (click)="toggle(department)"
+              ></button>
             </td>
           </tr>
         }

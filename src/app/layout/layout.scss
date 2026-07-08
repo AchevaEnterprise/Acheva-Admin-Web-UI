@@ -39,14 +39,22 @@
     font-size: 0.9rem;
     text-decoration: none;
 
-    &:hover {
-      background: #f3f4f6;
+    // Hover only affects a non-active item — the active item keeps its
+    // gradient (a plain :hover wins on specificity and would grey it out).
+    &:hover:not(.shell__item--active) {
+      background: #d4e9ff;
+      color: #000;
     }
 
     &--active {
-      background: linear-gradient(90deg, #2793ff, #77bbff);
+      background: linear-gradient(180deg, #2793ff, #77bbff);
       color: #fff;
       font-weight: 600;
+
+      &:hover {
+        background: linear-gradient(180deg, #2793ff, #77bbff);
+        color: #fff;
+      }
     }
   }
 

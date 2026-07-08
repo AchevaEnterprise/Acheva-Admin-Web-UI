@@ -16,11 +16,12 @@ import {
   MatDialog,
   MatDialogRef,
 } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { finalize } from 'rxjs';
 import { IDepartment, IFaculty, ISchool } from '../../core/models/admin.model';
 import { AdminApiService } from '../../core/services/admin-api.service';
 import { ToastService } from '../../core/services/toast.service';
-import { ConfirmDialog, IConfirmData } from '../../shared/confirm-dialog';
 
 // ─── Create/Edit dialog ───────────────────────────────────────────────────────
 
@@ -80,6 +81,7 @@ export class DepartmentDialog {
   selector: 'app-departments',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [MatFormFieldModule, MatSelectModule],
   templateUrl: './departments.html',
 })
 export class Departments implements OnInit {
@@ -107,15 +109,15 @@ export class Departments implements OnInit {
     });
   }
 
-  onSchoolChange(event: Event): void {
-    this.selectedSchoolId.set((event.target as HTMLSelectElement).value);
+  onSchoolChange(schoolId: string): void {
+    this.selectedSchoolId.set(schoolId);
     this.selectedFacultyId.set('');
     this.departments.set([]);
     this.loadFaculties();
   }
 
-  onFacultyChange(event: Event): void {
-    this.selectedFacultyId.set((event.target as HTMLSelectElement).value);
+  onFacultyChange(facultyId: string): void {
+    this.selectedFacultyId.set(facultyId);
     this.load();
   }
 
@@ -180,26 +182,14 @@ export class Departments implements OnInit {
       });
   }
 
-  remove(department: IDepartment): void {
-    const data: IConfirmData = {
-      title: `Delete ${department.name}?`,
-      message:
-        'Courses, curricula, staff and students referencing this department are not deleted automatically.',
-      confirmLabel: 'Delete department',
-      destructive: true,
-    };
-    this.dialog
-      .open(ConfirmDialog, { data })
-      .afterClosed()
-      .subscribe((confirmed: boolean) => {
-        if (!confirmed) return;
-        this.api.deleteDepartment(department._id).subscribe({
-          next: () => {
-            this.toast.success('Department deleted.');
-            this.load();
-          },
-          error: () => this.toast.error('Could not delete department.'),
-        });
-      });
+  toggle(department: IDepartment): void {
+    const next = !(department.isActive ?? true);
+    this.api.updateDepartment(department._id, { isActive: next }).subscribe({
+      next: () => {
+        this.toast.success(next ? 'Department enabled.' : 'Department disabled.');
+        this.load();
+      },
+      error: () => this.toast.error('Could not update department status.'),
+    });
   }
 }

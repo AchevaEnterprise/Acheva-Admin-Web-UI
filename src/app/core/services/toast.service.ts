@@ -6,13 +6,19 @@ export class ToastService {
   private readonly snackBar = inject(MatSnackBar);
 
   success(message: string): void {
-    this.snackBar.open(message, 'OK', { duration: 4000 });
+    this.snackBar.open(message, 'OK', {
+      duration: 4000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
+    });
   }
 
   error(message: string): void {
     this.snackBar.open(message, 'Dismiss', {
       duration: 6000,
       panelClass: 'admin-toast-error',
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
     });
   }
 }

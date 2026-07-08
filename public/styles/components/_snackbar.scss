@@ -1,15 +1,25 @@
 @use '@angular/material' as mat;
 
 :root {
+  // Dark surface + white text is the standard, readable snackbar. A white
+  // container (the old value) left the default light label text unreadable.
   @include mat.snack-bar-overrides(
     (
-      container-color: #fff,
-      container-shape: '20px',
+      container-color: #1f2937,
+      supporting-text-color: #ffffff,
+      button-color: #77bbff,
+      container-shape: 10px,
     )
   );
 }
 
 .mat-mdc-snack-bar-container .mat-mdc-snackbar-surface {
   overflow: hidden;
-  max-width: 45% !important;
+  max-width: 520px !important;
+}
+
+// Error toasts read as an alert without losing legibility.
+.admin-toast-error {
+  --mdc-snackbar-container-color: #b91c1c;
+  --mat-snack-bar-button-color: #ffffff;
 }

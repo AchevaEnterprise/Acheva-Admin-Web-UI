@@ -1,69 +1,182 @@
 .login-shell {
   min-height: 100dvh;
   display: grid;
-  place-items: center;
-  background: #f5f7fa;
+  grid-template-columns: 1fr 1fr;
+  background: #fff;
 }
 
-.login-card {
-  width: min(420px, calc(100vw - 32px));
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
-  padding: 40px;
+/* ── Brand banner (left) ────────────────────────────────────────────────── */
+.login-banner {
+  position: relative;
+  background: #d4e9ff;
+  padding: 2.5rem 2rem;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  text-align: center;
 
   &__logo {
-    width: 48px;
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__mark { width: 40px; height: 40px; }
+  &__name { height: 22px; }
+
+  &__art {
+    position: relative;
+    width: 20rem;
+    height: 20rem;
+    margin-bottom: 1.5rem;
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &__float {
+    position: absolute;
+  }
+
+  &__float--clock { top: -1.5rem; right: 1rem; width: 5rem; }
+  &__float--automate { top: 20%; left: -3rem; width: 10rem; }
+  &__float--mobility { top: 50%; right: -3rem; height: 9rem; }
+
+  &__title {
+    max-width: 22rem;
+    color: #0b3a6f;
+    margin: 0 0 0.5rem;
+  }
+
+  &__tagline {
+    max-width: 24rem;
+    color: #3b6ea5;
+    margin: 0;
+  }
+}
+
+/* ── Form (right) ───────────────────────────────────────────────────────── */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  width: min(400px, calc(100vw - 48px));
+  margin: 0 auto;
+  padding: 40px 24px;
+
+  &__logo-md {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 8px;
+
+    img:first-child { width: 40px; height: 40px; }
+    img:last-child { height: 22px; }
+  }
+
+  &__head {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     margin-bottom: 8px;
   }
 
-  &__field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-top: 16px;
-
-    span {
-      font-size: 0.8125rem;
-      font-weight: 500;
-      color: #374151;
-    }
-
-    input {
-      padding: 12px 14px;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      font: inherit;
-
-      &:focus {
-        outline: none;
-        border-color: #2793ff;
-      }
-    }
-  }
-
   &__submit {
-    margin-top: 24px;
-    padding: 12px;
+    margin-top: 8px;
+    padding: 14px;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     background: #2793ff;
     color: #fff;
     font: inherit;
     font-weight: 600;
     cursor: pointer;
+    transition: background 0.15s;
 
     &:disabled {
       opacity: 0.6;
       cursor: default;
     }
 
-    &:hover:not(:disabled) {
-      background: #1d7fe0;
-    }
+    &:hover:not(:disabled) { background: #1d7fe0; }
   }
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  &__control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 14px;
+    height: 52px;
+    border: 1px solid #d2d1d1;
+    border-radius: 10px;
+    background: #fff;
+    transition: border-color 0.15s;
+
+    &:focus-within { border-color: #2793ff; }
+    &--error { border-color: #d8315b; }
+  }
+
+  &__icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font: inherit;
+    font-size: 0.9375rem;
+    color: #1f2937;
+
+    &::placeholder { color: #9ca3af; }
+  }
+
+  &__eye {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border: none;
+    background: none;
+    color: #6b7280;
+    cursor: pointer;
+    flex-shrink: 0;
+
+    &:hover { color: #2793ff; }
+  }
+}
+
+/* Single-column on tablet/phone: hide the banner, show the inline logo. */
+@media (max-width: 900px) {
+  .login-shell { grid-template-columns: 1fr; }
+  .login-banner { display: none; }
+  .login-form__logo-md { display: flex; }
 }

@@ -19,23 +19,33 @@
 
 <section class="adm-card">
   <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end" class="mb-4">
-    <div>
-      <label class="acva-caption text-neutral-500" for="cur-school">School</label><br />
-      <select id="cur-school" class="adm-select mt-1" (change)="onSchoolChange($event)">
-        @for (school of schools(); track school._id) {
-          <option [value]="school._id" [selected]="school._id === selectedSchoolId()">{{ school.name }}</option>
-        }
-      </select>
+    <div class="adm-field adm-field--inline" style="margin-bottom: 0">
+      <label class="adm-field__label" for="cur-school">School</label>
+      <mat-form-field appearance="outline" class="adm-mat adm-mat--inline">
+        <mat-select
+          id="cur-school"
+          [value]="selectedSchoolId()"
+          (selectionChange)="onSchoolChange($event.value)"
+        >
+          @for (school of schools(); track school._id) {
+            <mat-option [value]="school._id">{{ school.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
     </div>
-    <div>
-      <label class="acva-caption text-neutral-500" for="cur-dept">Department</label><br />
-      <select id="cur-dept" class="adm-select mt-1" (change)="onDepartmentChange($event)">
-        @for (department of departments(); track department._id) {
-          <option [value]="department._id" [selected]="department._id === selectedDepartmentId()">
-            {{ department.name }}
-          </option>
-        }
-      </select>
+    <div class="adm-field adm-field--inline" style="margin-bottom: 0">
+      <label class="adm-field__label" for="cur-dept">Department</label>
+      <mat-form-field appearance="outline" class="adm-mat adm-mat--inline">
+        <mat-select
+          id="cur-dept"
+          [value]="selectedDepartmentId()"
+          (selectionChange)="onDepartmentChange($event.value)"
+        >
+          @for (department of departments(); track department._id) {
+            <mat-option [value]="department._id">{{ department.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
     </div>
     <div>
       <span class="acva-caption text-neutral-500">Level</span><br />

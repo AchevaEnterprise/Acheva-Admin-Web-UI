@@ -1,22 +1,93 @@
 <div class="login-shell">
-  <form class="login-card" [formGroup]="form" (ngSubmit)="submit()">
-    <img src="images/logo.svg" alt="Acheva" class="login-card__logo" onerror="this.style.display='none'" />
-    <h1 class="acva-heading-6 fw-600">Admin Sign in</h1>
-    <p class="acva-para-1 text-neutral-500">
-      Manage schools, catalogues and academic sessions.
+  <!-- Brand banner — mirrors the staff auth banner -->
+  <section class="login-banner">
+    <div class="login-banner__logo">
+      <img src="icons/logos/acheva-letter.svg" alt="Acheva" class="login-banner__mark" />
+      <img src="icons/logos/company-name-logo.svg" alt="Acheva" class="login-banner__name" />
+    </div>
+
+    <div class="login-banner__art">
+      <img src="images/auth/create-banner.png" alt="" class="login-banner__img" />
+      <img src="icons/auth/table-clock.svg" alt="" class="login-banner__float login-banner__float--clock" />
+      <img src="icons/auth/automate.svg" alt="" class="login-banner__float login-banner__float--automate" />
+      <img src="icons/auth/mobility-info.svg" alt="" class="login-banner__float login-banner__float--mobility" />
+    </div>
+
+    <h2 class="login-banner__title acva-heading-4 fw-400">
+      Effortless Grading, Accurate Reporting
+    </h2>
+    <p class="login-banner__tagline acva-para-1">
+      Manage schools, catalogues and academic sessions from one control room.
     </p>
+  </section>
 
-    <label class="login-card__field">
-      <span>Email</span>
-      <input type="email" formControlName="email" placeholder="members@acheva.app" autocomplete="username" />
+  <!-- Form -->
+  <form class="login-form" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="login-form__logo-md">
+      <img src="icons/logos/acheva-letter.svg" alt="Acheva" />
+      <img src="icons/logos/company-name-logo.svg" alt="Acheva" />
+    </div>
+
+    <div class="login-form__head">
+      <p class="acva-para-1 text-neutral-500 m-0">Welcome Back</p>
+      <h1 class="acva-heading-3 fw-600 m-0">Admin Login</h1>
+      <p class="acva-para-1 text-neutral-500 m-0">
+        Access your dashboard by logging in below
+      </p>
+    </div>
+
+    <label class="login-field">
+      <span class="login-field__label">School Email</span>
+      <span
+        class="login-field__control"
+        [class.login-field__control--error]="showError('email')"
+      >
+        <img src="icons/general/email-icon.svg" alt="" class="login-field__icon" />
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="you@acheva.app"
+          autocomplete="username"
+        />
+      </span>
     </label>
 
-    <label class="login-card__field">
-      <span>Password</span>
-      <input type="password" formControlName="password" placeholder="••••••••" autocomplete="current-password" />
+    <label class="login-field">
+      <span class="login-field__label">Password</span>
+      <span
+        class="login-field__control"
+        [class.login-field__control--error]="showError('password')"
+      >
+        <img src="icons/general/lock-icon.svg" alt="" class="login-field__icon" />
+        <input
+          [type]="showPassword() ? 'text' : 'password'"
+          formControlName="password"
+          placeholder="Enter your password"
+          autocomplete="current-password"
+        />
+        <button
+          type="button"
+          class="login-field__eye"
+          (click)="togglePasswordVisibility()"
+          [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+        >
+          @if (showPassword()) {
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          } @else {
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c6.4 0 10 7 10 7a17.6 17.6 0 0 1-2.4 3.3M6.6 6.6A17.4 17.4 0 0 0 2 11s3.6 7 10 7a9 9 0 0 0 3.9-.86" />
+              <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+              <path d="m2 2 20 20" />
+            </svg>
+          }
+        </button>
+      </span>
     </label>
 
-    <button type="submit" class="login-card__submit" [disabled]="loading()">
+    <button type="submit" class="login-form__submit" [disabled]="loading()">
       {{ loading() ? 'Signing in…' : 'Sign in' }}
     </button>
   </form>

@@ -24,6 +24,17 @@ export class Login {
   private readonly router = inject(Router);
 
   loading = signal(false);
+  showPassword = signal(false);
+
+  togglePasswordVisibility(): void {
+    this.showPassword.update((shown) => !shown);
+  }
+
+  /** Only surface a field error once the user has interacted with it. */
+  showError(field: 'email' | 'password'): boolean {
+    const control = this.form.controls[field];
+    return control.invalid && (control.touched || control.dirty);
+  }
 
   form = new FormGroup({
     email: new FormControl('', {

@@ -11,7 +11,6 @@ import { finalize } from 'rxjs';
 import { AdminApiService } from '../../core/services/admin-api.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ISchool } from '../../core/models/admin.model';
-import { ConfirmDialog, IConfirmData } from '../../shared/confirm-dialog';
 import { ISchoolDialogResult, SchoolDialog } from './school-dialog';
 
 /** School Management — table with counts, create/edit/toggle/delete. */
@@ -104,26 +103,4 @@ export class Schools implements OnInit {
     });
   }
 
-  remove(school: ISchool): void {
-    const data: IConfirmData = {
-      title: `Delete ${school.acronym || school.name}?`,
-      message:
-        'This removes the institution from the platform. Faculties, departments and accounts under it are not deleted automatically — this is a dev-only action for now.',
-      confirmLabel: 'Delete school',
-      destructive: true,
-    };
-    this.dialog
-      .open(ConfirmDialog, { data })
-      .afterClosed()
-      .subscribe((confirmed: boolean) => {
-        if (!confirmed) return;
-        this.api.deleteSchool(school._id).subscribe({
-          next: () => {
-            this.toast.success('School deleted.');
-            this.load();
-          },
-          error: () => this.toast.error('Could not delete school.'),
-        });
-      });
-  }
 }

@@ -34,6 +34,7 @@ export interface IFaculty {
   readonly name: string;
   readonly code?: string;
   readonly school: string;
+  readonly isActive?: boolean;
 }
 
 export interface IDepartment {
@@ -41,6 +42,7 @@ export interface IDepartment {
   readonly name: string;
   readonly code?: string;
   readonly faculty: string;
+  readonly isActive?: boolean;
 }
 
 export interface ICurriculumRow {
@@ -78,6 +80,8 @@ export interface ISchoolSettings {
   readonly activeSession: string;
   readonly activeSemester: string;
   readonly registrationGraceDays: number;
+  readonly registrationDeadline?: string | null;
+  readonly registrationGate?: 'AUTO' | 'OPEN' | 'CLOSED';
   readonly updatedAt?: string;
 }
 

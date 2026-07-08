@@ -96,10 +96,6 @@ export class AdminApiService {
     return this.http.patch<IAPIResponse<ISchool>>(`${this.base}/schools/${id}`, body);
   }
 
-  deleteSchool(id: string): Observable<IAPIResponse<ISchool>> {
-    return this.http.delete<IAPIResponse<ISchool>>(`${this.base}/schools/${id}`);
-  }
-
   // ── Faculties / Departments ───────────────────────────────────────────────
 
   faculties(schoolId: string): Observable<IAPIResponse<IFaculty[]>> {
@@ -120,17 +116,11 @@ export class AdminApiService {
 
   updateFaculty(
     id: string,
-    body: Partial<{ name: string; code: string }>,
+    body: Partial<{ name: string; code: string; isActive: boolean }>,
   ): Observable<IAPIResponse<IFaculty>> {
     return this.http.patch<IAPIResponse<IFaculty>>(
       `${this.base}/schools/faculties/${id}`,
       body,
-    );
-  }
-
-  deleteFaculty(id: string): Observable<IAPIResponse<IFaculty>> {
-    return this.http.delete<IAPIResponse<IFaculty>>(
-      `${this.base}/schools/faculties/${id}`,
     );
   }
 
@@ -152,17 +142,11 @@ export class AdminApiService {
 
   updateDepartment(
     id: string,
-    body: Partial<{ name: string; code: string }>,
+    body: Partial<{ name: string; code: string; isActive: boolean }>,
   ): Observable<IAPIResponse<IDepartment>> {
     return this.http.patch<IAPIResponse<IDepartment>>(
       `${this.base}/schools/faculties/departments/${id}`,
       body,
-    );
-  }
-
-  deleteDepartment(id: string): Observable<IAPIResponse<IDepartment>> {
-    return this.http.delete<IAPIResponse<IDepartment>>(
-      `${this.base}/schools/faculties/departments/${id}`,
     );
   }
 
@@ -288,6 +272,8 @@ export class AdminApiService {
       activeSession: string;
       activeSemester: string;
       registrationGraceDays: number;
+      registrationDeadline: string;
+      registrationGate: 'AUTO' | 'OPEN' | 'CLOSED';
     }>,
   ): Observable<IAPIResponse<ISchoolSettings>> {
     return this.http.patch<IAPIResponse<ISchoolSettings>>(

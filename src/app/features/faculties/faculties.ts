@@ -16,11 +16,12 @@ import {
   MatDialog,
   MatDialogRef,
 } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { finalize } from 'rxjs';
 import { IFaculty, ISchool } from '../../core/models/admin.model';
 import { AdminApiService } from '../../core/services/admin-api.service';
 import { ToastService } from '../../core/services/toast.service';
-import { ConfirmDialog, IConfirmData } from '../../shared/confirm-dialog';
 
 // ─── Create/Edit dialog ───────────────────────────────────────────────────────
 
@@ -80,6 +81,7 @@ export class FacultyDialog {
   selector: 'app-faculties',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [MatFormFieldModule, MatSelectModule],
   templateUrl: './faculties.html',
 })
 export class Faculties implements OnInit {
@@ -105,8 +107,8 @@ export class Faculties implements OnInit {
     });
   }
 
-  onSchoolChange(event: Event): void {
-    this.selectedSchoolId.set((event.target as HTMLSelectElement).value);
+  onSchoolChange(schoolId: string): void {
+    this.selectedSchoolId.set(schoolId);
     this.load();
   }
 
@@ -158,25 +160,14 @@ export class Faculties implements OnInit {
       });
   }
 
-  remove(faculty: IFaculty): void {
-    const data: IConfirmData = {
-      title: `Delete ${faculty.name}?`,
-      message: 'Departments under this faculty are not deleted automatically.',
-      confirmLabel: 'Delete faculty',
-      destructive: true,
-    };
-    this.dialog
-      .open(ConfirmDialog, { data })
-      .afterClosed()
-      .subscribe((confirmed: boolean) => {
-        if (!confirmed) return;
-        this.api.deleteFaculty(faculty._id).subscribe({
-          next: () => {
-            this.toast.success('Faculty deleted.');
-            this.load();
-          },
-          error: () => this.toast.error('Could not delete faculty.'),
-        });
-      });
+  toggle(faculty: IFaculty): void {
+    const next = !(faculty.isActive ?? true);
+    this.api.updateFaculty(faculty._id, { isActive: next }).subscribe({
+      next: () => {
+        this.toast.success(next ? 'Faculty enabled.' : 'Faculty disabled.');
+        this.load();
+      },
+      error: () => this.toast.error('Could not update faculty status.'),
+    });
   }
 }

@@ -9,15 +9,20 @@
 </div>
 
 <section class="adm-card">
-  <label class="acva-caption text-neutral-500" for="fac-school">School</label>
-  <br />
-  <select id="fac-school" class="adm-select mt-1 mb-4" (change)="onSchoolChange($event)">
-    @for (school of schools(); track school._id) {
-      <option [value]="school._id" [selected]="school._id === selectedSchoolId()">
-        {{ school.name }}
-      </option>
-    }
-  </select>
+  <div class="adm-field adm-field--inline">
+    <label class="adm-field__label" for="fac-school">School</label>
+    <mat-form-field appearance="outline" class="adm-mat adm-mat--inline">
+      <mat-select
+        id="fac-school"
+        [value]="selectedSchoolId()"
+        (selectionChange)="onSchoolChange($event.value)"
+      >
+        @for (school of schools(); track school._id) {
+          <mat-option [value]="school._id">{{ school.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
 
   @if (loading()) {
     <p class="adm-empty">Loading faculties…</p>
@@ -26,7 +31,7 @@
   } @else {
     <table class="adm-table">
       <thead>
-        <tr><th>Name</th><th>Code</th><th>Action</th></tr>
+        <tr><th>Name</th><th>Code</th><th>Status</th><th>Action</th></tr>
       </thead>
       <tbody>
         @for (faculty of faculties(); track faculty._id) {
@@ -34,8 +39,23 @@
             <td class="fw-600">{{ faculty.name }}</td>
             <td>{{ faculty.code || '—' }}</td>
             <td>
+              <span
+                class="adm-chip"
+                [class.adm-chip--active]="faculty.isActive !== false"
+                [class.adm-chip--disabled]="faculty.isActive === false"
+              >
+                {{ faculty.isActive === false ? 'Disabled' : 'Active' }}
+              </span>
+            </td>
+            <td>
               <button type="button" class="adm-icon-btn" aria-label="Edit faculty" (click)="edit(faculty)">✏️</button>
-              <button type="button" class="adm-icon-btn" aria-label="Delete faculty" (click)="remove(faculty)">🗑️</button>
+              <button
+                type="button"
+                class="adm-toggle"
+                [class.adm-toggle--on]="faculty.isActive !== false"
+                [attr.aria-label]="faculty.isActive === false ? 'Enable faculty' : 'Disable faculty'"
+                (click)="toggle(faculty)"
+              ></button>
             </td>
           </tr>
         }

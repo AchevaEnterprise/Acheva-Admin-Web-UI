@@ -12,9 +12,11 @@ import {
   Validators,
 } from '@angular/forms';
 import { finalize } from 'rxjs';
-import { SEMESTERS } from '../../core/constants';
+import { SEMESTERS, SESSIONS } from '../../core/constants';
 import { ISchool, ISchoolSettings } from '../../core/models/admin.model';
 import { MatDialog } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { AdminApiService } from '../../core/services/admin-api.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ConfirmDialog, IConfirmData } from '../../shared/confirm-dialog';
@@ -28,7 +30,7 @@ import { ConfirmDialog, IConfirmData } from '../../shared/confirm-dialog';
   selector: 'app-settings',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, MatFormFieldModule, MatSelectModule],
   templateUrl: './settings.html',
 })
 export class Settings implements OnInit {
@@ -37,6 +39,7 @@ export class Settings implements OnInit {
   private readonly dialog = inject(MatDialog);
 
   readonly semesters = SEMESTERS;
+  readonly sessions = SESSIONS;
 
   schools = signal<ISchool[]>([]);
   selectedSchoolId = signal('');
@@ -56,7 +59,33 @@ export class Settings implements OnInit {
       nonNullable: true,
       validators: [Validators.required, Validators.min(0), Validators.max(365)],
     }),
+    registrationDeadline: new FormControl('', { nonNullable: true }),
   });
+
+  /** Which gate is currently being saved — so only that button shows busy. */
+  settingGate = signal<'AUTO' | 'OPEN' | 'CLOSED' | null>(null);
+
+  /** Manual gate: OPEN/CLOSED override the dates; AUTO follows them. */
+  setGate(gate: 'AUTO' | 'OPEN' | 'CLOSED'): void {
+    this.settingGate.set(gate);
+    this.api
+      .updateSettings(this.selectedSchoolId(), { registrationGate: gate })
+      .pipe(finalize(() => this.settingGate.set(null)))
+      .subscribe({
+        next: (resp) => {
+          this.current.set(resp.data);
+          this.toast.success(
+            gate === 'AUTO'
+              ? 'Gate follows the deadline and grace windows.'
+              : gate === 'OPEN'
+                ? 'Registration gate forced OPEN.'
+                : 'Registration gate CLOSED — students cannot edit.',
+          );
+        },
+        error: (err) =>
+          this.toast.error(err?.error?.message ?? 'Could not set the gate.'),
+      });
+  }
 
   ngOnInit(): void {
     this.api.schools().subscribe({
@@ -71,8 +100,8 @@ export class Settings implements OnInit {
     });
   }
 
-  onSchoolChange(event: Event): void {
-    this.selectedSchoolId.set((event.target as HTMLSelectElement).value);
+  onSchoolChange(schoolId: string): void {
+    this.selectedSchoolId.set(schoolId);
     this.load();
   }
 
@@ -85,6 +114,9 @@ export class Settings implements OnInit {
             activeSession: resp.data.activeSession,
             activeSemester: resp.data.activeSemester,
             registrationGraceDays: resp.data.registrationGraceDays,
+            registrationDeadline: resp.data.registrationDeadline
+              ? String(resp.data.registrationDeadline).slice(0, 10)
+              : '',
           });
         }
       },
