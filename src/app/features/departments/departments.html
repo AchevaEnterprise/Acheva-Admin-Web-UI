@@ -41,7 +41,7 @@
   </div>
 
   @if (loading()) {
-    <p class="adm-empty">Loading departments…</p>
+    <app-skeleton-table [cols]="4" [rows]="6" />
   } @else if (departments().length === 0) {
     <p class="adm-empty">No departments in this faculty yet.</p>
   } @else {

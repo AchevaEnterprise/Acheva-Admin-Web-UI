@@ -12,12 +12,14 @@ import { AdminApiService } from '../../core/services/admin-api.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ISchool } from '../../core/models/admin.model';
 import { ISchoolDialogResult, SchoolDialog } from './school-dialog';
+import { SkeletonTable } from '../../shared/skeleton';
 
 /** School Management — table with counts, create/edit/toggle/delete. */
 @Component({
   selector: 'app-schools',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [SkeletonTable],
   templateUrl: './schools.html',
 })
 export class Schools implements OnInit {

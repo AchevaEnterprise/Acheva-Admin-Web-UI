@@ -25,7 +25,7 @@
   </div>
 
   @if (loading()) {
-    <p class="adm-empty">Loading faculties…</p>
+    <app-skeleton-table [cols]="4" [rows]="6" />
   } @else if (faculties().length === 0) {
     <p class="adm-empty">No faculties yet — create the first one.</p>
   } @else {

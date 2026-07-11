@@ -82,7 +82,7 @@
   </div>
 
   @if (loading()) {
-    <p class="adm-empty">Loading curriculum…</p>
+    <app-skeleton-table [cols]="5" [rows]="6" />
   } @else if (rows().length === 0) {
     <p class="adm-empty">
       No curriculum for this block yet — import the department's course list.

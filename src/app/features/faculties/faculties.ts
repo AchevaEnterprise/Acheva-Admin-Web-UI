@@ -22,6 +22,7 @@ import { finalize } from 'rxjs';
 import { IFaculty, ISchool } from '../../core/models/admin.model';
 import { AdminApiService } from '../../core/services/admin-api.service';
 import { ToastService } from '../../core/services/toast.service';
+import { SkeletonTable } from '../../shared/skeleton';
 
 // ─── Create/Edit dialog ───────────────────────────────────────────────────────
 
@@ -81,7 +82,7 @@ export class FacultyDialog {
   selector: 'app-faculties',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatFormFieldModule, MatSelectModule],
+  imports: [MatFormFieldModule, MatSelectModule, SkeletonTable],
   templateUrl: './faculties.html',
 })
 export class Faculties implements OnInit {

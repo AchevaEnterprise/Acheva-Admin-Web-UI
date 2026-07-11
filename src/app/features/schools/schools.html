@@ -19,7 +19,7 @@
   />
 
   @if (loading()) {
-    <p class="adm-empty">Loading schools…</p>
+    <app-skeleton-table [cols]="4" [rows]="6" />
   } @else if (filtered().length === 0) {
     <p class="adm-empty">No schools found.</p>
   } @else {

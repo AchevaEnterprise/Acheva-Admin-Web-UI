@@ -29,6 +29,7 @@ import {
 } from '../../core/models/admin.model';
 import { AdminApiService } from '../../core/services/admin-api.service';
 import { ToastService } from '../../core/services/toast.service';
+import { SkeletonTable } from '../../shared/skeleton';
 
 // ─── Create Course dialog (per Figma) ────────────────────────────────────────
 
@@ -225,7 +226,7 @@ export class CourseDialog {
   selector: 'app-courses',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatFormFieldModule, MatSelectModule],
+  imports: [MatFormFieldModule, MatSelectModule, SkeletonTable],
   templateUrl: './courses.html',
 })
 export class Courses implements OnInit {
