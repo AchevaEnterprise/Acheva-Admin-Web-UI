@@ -99,8 +99,10 @@ export class AdminApiService {
   // ── Faculties / Departments ───────────────────────────────────────────────
 
   faculties(schoolId: string): Observable<IAPIResponse<IFaculty[]>> {
+    // Admin manages the full org tree — include deactivated faculties so they
+    // can be seen and re-enabled (staff/sign-up dropdowns omit this flag).
     return this.http.get<IAPIResponse<IFaculty[]>>(
-      `${this.base}/schools/${schoolId}/faculties`,
+      `${this.base}/schools/${schoolId}/faculties?includeInactive=true`,
     );
   }
 
@@ -125,8 +127,9 @@ export class AdminApiService {
   }
 
   departments(facultyId: string): Observable<IAPIResponse<IDepartment[]>> {
+    // Include deactivated departments for admin management (see `faculties`).
     return this.http.get<IAPIResponse<IDepartment[]>>(
-      `${this.base}/schools/faculties/${facultyId}/departments`,
+      `${this.base}/schools/faculties/${facultyId}/departments?includeInactive=true`,
     );
   }
 
