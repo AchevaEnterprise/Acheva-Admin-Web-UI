@@ -49,6 +49,13 @@ export const routes: Routes = [
           import('./features/admins/admins').then((m) => m.Admins),
       },
       {
+        path: 'registration',
+        loadComponent: () =>
+          import('./features/registration/registration').then(
+            (m) => m.RegistrationSettings,
+          ),
+      },
+      {
         path: 'settings',
         loadComponent: () =>
           import('./features/settings/settings').then((m) => m.Settings),

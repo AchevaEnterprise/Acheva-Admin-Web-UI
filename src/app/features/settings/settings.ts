@@ -55,37 +55,7 @@ export class Settings implements OnInit {
       nonNullable: true,
       validators: [Validators.required],
     }),
-    registrationGraceDays: new FormControl(60, {
-      nonNullable: true,
-      validators: [Validators.required, Validators.min(0), Validators.max(365)],
-    }),
-    registrationDeadline: new FormControl('', { nonNullable: true }),
   });
-
-  /** Which gate is currently being saved — so only that button shows busy. */
-  settingGate = signal<'AUTO' | 'OPEN' | 'CLOSED' | null>(null);
-
-  /** Manual gate: OPEN/CLOSED override the dates; AUTO follows them. */
-  setGate(gate: 'AUTO' | 'OPEN' | 'CLOSED'): void {
-    this.settingGate.set(gate);
-    this.api
-      .updateSettings(this.selectedSchoolId(), { registrationGate: gate })
-      .pipe(finalize(() => this.settingGate.set(null)))
-      .subscribe({
-        next: (resp) => {
-          this.current.set(resp.data);
-          this.toast.success(
-            gate === 'AUTO'
-              ? 'Gate follows the deadline and grace windows.'
-              : gate === 'OPEN'
-                ? 'Registration gate forced OPEN.'
-                : 'Registration gate CLOSED — students cannot edit.',
-          );
-        },
-        error: (err) =>
-          this.toast.error(err?.error?.message ?? 'Could not set the gate.'),
-      });
-  }
 
   ngOnInit(): void {
     this.api.schools().subscribe({
@@ -113,10 +83,6 @@ export class Settings implements OnInit {
           this.form.patchValue({
             activeSession: resp.data.activeSession,
             activeSemester: resp.data.activeSemester,
-            registrationGraceDays: resp.data.registrationGraceDays,
-            registrationDeadline: resp.data.registrationDeadline
-              ? String(resp.data.registrationDeadline).slice(0, 10)
-              : '',
           });
         }
       },

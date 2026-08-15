@@ -351,3 +351,42 @@ body {
   font-size: 0.875rem;
 }
 
+
+// ── Course registration control (admin) ──────────────────────────────────────
+// The window state is the first thing on the page, so it is colour-coded by
+// what it means for students rather than by severity.
+
+.reg-state {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 0.875rem;
+
+  // No closing date: registration cannot run at all. Loudest state.
+  &--missing {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+  }
+
+  &--open {
+    background: #e8f3ff;
+    color: #134980;
+    border: 1px solid #bfdbfe;
+  }
+
+  &--closed {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+  }
+}
+
+.reg-required {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.reg-error {
+  color: #b91c1c;
+}

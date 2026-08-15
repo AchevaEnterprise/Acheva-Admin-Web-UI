@@ -1,0 +1,157 @@
+<div class="adm-page-head">
+  <div>
+    <h2 class="acva-heading-5 fw-600 m-0">Course Registration</h2>
+    <p class="acva-para-1 text-neutral-500 m-0">
+      Students register their own courses. This page decides when they can.
+    </p>
+  </div>
+</div>
+
+<section class="adm-card" style="max-width: 680px">
+  <div class="adm-field adm-field--inline">
+    <label class="adm-field__label" for="reg-school">School</label>
+    <mat-form-field appearance="outline" class="adm-mat adm-mat--inline">
+      <mat-select
+        id="reg-school"
+        [value]="selectedSchoolId()"
+        (selectionChange)="onSchoolChange($event.value)"
+      >
+        @for (school of schools(); track school._id) {
+          <mat-option [value]="school._id">{{ school.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <!-- The state of the window, in one line, before anything else. -->
+  @switch (windowState()) {
+    @case ('UNCONFIGURED') {
+      <p class="reg-state reg-state--missing">
+        <strong>No closing date set.</strong> Students cannot register, and
+        nobody will be auto-registered. Set one below.
+      </p>
+    }
+    @case ('OPEN') {
+      <p class="reg-state reg-state--open">
+        <strong>Registration is open.</strong>
+        @if (current()?.registrationGate === 'OPEN') {
+          The gate is forced open, so the closing date is being ignored.
+        } @else {
+          {{ daysLeft() }} day(s) left. When it closes, any student who has not
+          registered is registered automatically.
+        }
+      </p>
+    }
+    @case ('CLOSED') {
+      <p class="reg-state reg-state--closed">
+        <strong>Registration is closed.</strong>
+        @if (current()?.registrationGate === 'CLOSED') {
+          The gate is forced closed.
+        } @else {
+          The closing date has passed. Students can no longer register or
+          change courses; anyone unregistered has been swept automatically.
+        }
+      </p>
+    }
+  }
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <div class="adm-field">
+      <label class="adm-field__label" for="reg-deadline">
+        Registration closing date <span class="reg-required">(required)</span>
+      </label>
+      <input
+        id="reg-deadline"
+        class="adm-input"
+        style="width: 180px"
+        type="date"
+        formControlName="registrationDeadline"
+      />
+      <p class="acva-caption text-neutral-500 mt-1">
+        After this date students can neither register nor change their courses,
+        and every student without a registration is registered automatically
+        using the normal guidelines.
+      </p>
+      @if (
+        form.controls.registrationDeadline.touched &&
+        form.controls.registrationDeadline.invalid
+      ) {
+        <p class="acva-caption reg-error mt-1">
+          Every school must have a closing date.
+        </p>
+      }
+    </div>
+
+    <div class="adm-field">
+      <label class="adm-field__label" for="reg-grace">
+        Self-edit window (days)
+      </label>
+      <input
+        id="reg-grace"
+        class="adm-input"
+        style="width: 120px"
+        type="number"
+        min="0"
+        max="365"
+        formControlName="registrationGraceDays"
+      />
+      <p class="acva-caption text-neutral-500 mt-1">
+        How long a student may change electives after registering. Whichever
+        comes first — this window or the closing date — ends their edits.
+      </p>
+    </div>
+
+    <div class="mt-2">
+      <button type="submit" class="adm-btn" [disabled]="saving()">
+        {{ saving() ? 'Saving…' : 'Save registration window' }}
+      </button>
+    </div>
+  </form>
+</section>
+
+<section class="adm-card mt-6" style="max-width: 680px">
+  <h3 class="acva-para-2 fw-600 m-0">Manual gate</h3>
+  <p class="acva-para-1 text-neutral-500">
+    Overrides the closing date when you need to. Current:
+    <strong>{{ current()?.registrationGate || 'AUTO' }}</strong>
+  </p>
+  <div style="display: flex; gap: 10px; flex-wrap: wrap">
+    <button
+      type="button"
+      class="adm-btn"
+      [class.adm-btn--outline]="
+        (current()?.registrationGate || 'AUTO') !== 'OPEN'
+      "
+      [disabled]="settingGate() === 'OPEN'"
+      (click)="setGate('OPEN')"
+    >
+      {{ settingGate() === 'OPEN' ? 'Saving…' : 'Force open' }}
+    </button>
+    <button
+      type="button"
+      class="adm-btn"
+      [class.adm-btn--outline]="
+        (current()?.registrationGate || 'AUTO') !== 'CLOSED'
+      "
+      [disabled]="settingGate() === 'CLOSED'"
+      (click)="setGate('CLOSED')"
+    >
+      {{ settingGate() === 'CLOSED' ? 'Saving…' : 'Close now' }}
+    </button>
+    <button
+      type="button"
+      class="adm-btn"
+      [class.adm-btn--outline]="
+        (current()?.registrationGate || 'AUTO') !== 'AUTO'
+      "
+      [disabled]="settingGate() === 'AUTO'"
+      (click)="setGate('AUTO')"
+    >
+      {{ settingGate() === 'AUTO' ? 'Saving…' : 'Follow the date (auto)' }}
+    </button>
+  </div>
+  <p class="acva-caption text-neutral-500 mt-2">
+    Forcing the gate <strong>open</strong> also suspends the automatic sweep —
+    nobody is auto-registered while registration is still open.
+  </p>
+</section>

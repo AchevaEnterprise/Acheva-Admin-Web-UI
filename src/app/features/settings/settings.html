@@ -26,11 +26,14 @@
   @if (current(); as settings) {
     <p class="acva-para-1 mb-4" style="background: #e8f3ff; color: #134980; padding: 12px 16px; border-radius: 8px">
       Current: <strong>{{ settings.activeSession }}</strong> · {{ settings.activeSemester }}
-      · {{ settings.registrationGraceDays }}-day student edit window
+      — registration windows are on the <strong>Registration</strong> page
     </p>
   } @else {
     <p class="acva-para-1 mb-4" style="background: #fef3c7; color: #92400e; padding: 12px 16px; border-radius: 8px">
-      No active session configured yet — registration cannot run until one is set.
+      This school is not set up yet. Start on the
+      <strong>Registration</strong> page: a registration closing date is
+      required before any session settings can be saved, because registration
+      cannot open, close or auto-complete without one.
     </p>
   }
 
@@ -62,79 +65,12 @@
       </span>
     </div>
 
-    <div class="adm-field">
-      <label class="adm-field__label" for="set-grace">
-        Student self-edit window (days after auto-registration)
-      </label>
-      <input
-        id="set-grace"
-        class="adm-input"
-        style="width: 120px"
-        type="number"
-        min="0"
-        max="365"
-        formControlName="registrationGraceDays"
-      />
-    </div>
-
-    <div class="adm-field">
-      <label class="adm-field__label" for="set-deadline">
-        Registration closing date (hard cutoff for student edits — optional)
-      </label>
-      <input
-        id="set-deadline"
-        class="adm-input"
-        style="width: 180px"
-        type="date"
-        formControlName="registrationDeadline"
-      />
-    </div>
-
     <div class="mt-2">
       <button type="submit" class="adm-btn" [disabled]="saving()">
         {{ saving() ? 'Saving…' : 'Save session settings' }}
       </button>
     </div>
   </form>
-</section>
-
-<section class="adm-card mt-6" style="max-width: 620px">
-  <h3 class="acva-para-2 fw-600 m-0">Registration gate</h3>
-  <p class="acva-para-1 text-neutral-500">
-    The manual override: force the gate open or closed regardless of the
-    closing date and grace windows, or let it follow them automatically.
-    Current:
-    <strong>{{ current()?.registrationGate || 'AUTO' }}</strong>
-  </p>
-  <div style="display: flex; gap: 10px; flex-wrap: wrap">
-    <button
-      type="button"
-      class="adm-btn"
-      [class.adm-btn--outline]="(current()?.registrationGate || 'AUTO') !== 'OPEN'"
-      [disabled]="settingGate() === 'OPEN'"
-      (click)="setGate('OPEN')"
-    >
-      {{ settingGate() === 'OPEN' ? 'Saving…' : 'Force open' }}
-    </button>
-    <button
-      type="button"
-      class="adm-btn"
-      [class.adm-btn--outline]="(current()?.registrationGate || 'AUTO') !== 'CLOSED'"
-      [disabled]="settingGate() === 'CLOSED'"
-      (click)="setGate('CLOSED')"
-    >
-      {{ settingGate() === 'CLOSED' ? 'Saving…' : 'Close gate' }}
-    </button>
-    <button
-      type="button"
-      class="adm-btn"
-      [class.adm-btn--outline]="(current()?.registrationGate || 'AUTO') !== 'AUTO'"
-      [disabled]="settingGate() === 'AUTO'"
-      (click)="setGate('AUTO')"
-    >
-      {{ settingGate() === 'AUTO' ? 'Saving…' : 'Follow dates (auto)' }}
-    </button>
-  </div>
 </section>
 
 <section class="adm-card mt-6" style="max-width: 620px; border-left: 3px solid #f59e0b">

@@ -82,6 +82,12 @@ export class Layout {
       inactiveIcon: 'icons/menu/result-chart-inactive.svg',
     },
     {
+      label: 'Registration',
+      route: '/registration',
+      activeIcon: 'icons/menu/result-management-active.svg',
+      inactiveIcon: 'icons/menu/result-management-inactive.svg',
+    },
+    {
       label: 'Settings',
       route: '/settings',
       activeIcon: 'icons/menu/settings-active.svg',
