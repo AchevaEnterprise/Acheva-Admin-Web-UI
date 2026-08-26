@@ -28,7 +28,8 @@ import { SkeletonTable } from '../../shared/skeleton';
 
 export interface IFacultyDialogResult {
   name: string;
-  code?: string;
+  /** Short code printed on official documents (SOPS). Required. */
+  code: string;
   /** Which school the faculty belongs to — chosen in the dialog, never guessed. */
   schoolId: string;
 }
@@ -74,7 +75,7 @@ export interface IFacultyDialogData {
         <input class="adm-input" formControlName="name" placeholder="e.g School of Physical Sciences" />
       </label>
       <label>
-        Code
+        Code <span class="adm-req">*</span>
         <input class="adm-input" formControlName="code" placeholder="e.g SOPS" />
       </label>
       <div class="adm-dialog__actions">
@@ -101,7 +102,12 @@ export class FacultyDialog {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(3)],
     }),
-    code: new FormControl(this.faculty?.code ?? '', { nonNullable: true }),
+    // Required: FUTO's Official Grade Report prints this code, and a
+    // faculty without one leaves a blank on a signed academic record.
+    code: new FormControl(this.faculty?.code ?? '', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.maxLength(10)],
+    }),
   });
 
   save(): void {
@@ -109,7 +115,7 @@ export class FacultyDialog {
     const { name, code, schoolId } = this.form.getRawValue();
     this.ref.close({
       name: name.trim(),
-      code: code.trim() || undefined,
+      code: code.trim().toUpperCase(),
       schoolId,
     });
   }

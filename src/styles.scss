@@ -468,3 +468,10 @@ body {
 .reg-error {
   color: #b91c1c;
 }
+
+/* Marks a required field's label. Used where leaving the field blank would put
+   a gap on an official document (faculty / department codes). */
+.adm-req {
+  color: #d8315b;
+  font-weight: 500;
+}

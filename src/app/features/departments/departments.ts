@@ -28,7 +28,8 @@ import { SkeletonTable } from '../../shared/skeleton';
 
 export interface IDepartmentDialogResult {
   name: string;
-  code?: string;
+  /** Short code printed on official documents (MTH). Required. */
+  code: string;
 }
 
 @Component({
@@ -45,7 +46,7 @@ export interface IDepartmentDialogResult {
         <input class="adm-input" formControlName="name" placeholder="e.g Mathematics" />
       </label>
       <label>
-        Code
+        Code <span class="adm-req">*</span>
         <input class="adm-input" formControlName="code" placeholder="e.g MTH" />
       </label>
       <div class="adm-dialog__actions">
@@ -66,13 +67,18 @@ export class DepartmentDialog {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(2)],
     }),
-    code: new FormControl(this.department?.code ?? '', { nonNullable: true }),
+    // Required: FUTO's Official Grade Report prints this code, and a
+    // department without one leaves a blank on a signed academic record.
+    code: new FormControl(this.department?.code ?? '', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.maxLength(10)],
+    }),
   });
 
   save(): void {
     if (this.form.invalid) return;
     const { name, code } = this.form.getRawValue();
-    this.ref.close({ name: name.trim(), code: code.trim() || undefined });
+    this.ref.close({ name: name.trim(), code: code.trim().toUpperCase() });
   }
 }
 
