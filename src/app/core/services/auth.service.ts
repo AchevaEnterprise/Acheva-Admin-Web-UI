@@ -53,10 +53,35 @@ export class AuthService {
     if (raw) this.account.set(JSON.parse(raw) as IAdminProfile);
   }
 
+  /**
+   * Ends the session on the server as well as locally.
+   *
+   * Local state is cleared FIRST and unconditionally: a logout that waits on
+   * the network could be refused, and leaving someone signed in because a
+   * request failed is the worse outcome. The server call is best-effort — it
+   * revokes the refresh token so a captured one cannot outlive the session.
+   *
+   * No refresh token is sent because this app does not keep one (see the
+   * sign-in handler, which discards it). The server therefore ends every admin
+   * session rather than one device — the right reading of "log me out" when
+   * the client cannot say which session it is.
+   */
   signOut(): void {
+    const token = this.token;
+
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(ACCOUNT_KEY);
     this.account.set(null);
     void this.router.navigate(['/login']);
+
+    if (!token) return;
+
+    this.http
+      .post(
+        `${environment.BASE_URL}/auth/logout`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+      .subscribe({ error: () => undefined });
   }
 }
