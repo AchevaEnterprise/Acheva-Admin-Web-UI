@@ -138,16 +138,20 @@ export class Dashboard implements OnInit {
   }
 
   createFaculty(): void {
-    const school = this.schools[0];
-    if (!school) return;
+    // The school is chosen in the dialog. This used to default to schools[0],
+    // which silently filed the faculty under whichever institution happened
+    // to be first in the list.
     this.dialog
-      .open(FacultyDialog, { data: null })
+      .open(FacultyDialog, { data: { faculty: null, schools: this.schools } })
       .afterClosed()
       .subscribe((result: IFacultyDialogResult | undefined) => {
         if (!result) return;
-        this.api.createFaculty(school._id, result).subscribe({
+        const school = this.schools.find((s) => s._id === result.schoolId);
+        this.api.createFaculty(result.schoolId, result).subscribe({
           next: () => {
-            this.toast.success(`Faculty created in ${school.name}.`);
+            this.toast.success(
+              `Faculty created${school ? ` in ${school.name}` : ''}.`,
+            );
             this.ngOnInit();
           },
           error: (err) =>
