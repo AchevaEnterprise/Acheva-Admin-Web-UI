@@ -18,6 +18,7 @@ import {
 } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { MatRadioModule } from '@angular/material/radio';
 import { finalize } from 'rxjs';
 import { LEVELS, SEMESTERS } from '../../core/constants';
 import {
@@ -41,7 +42,7 @@ interface ICourseDialogContext {
   selector: 'app-course-dialog',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, MatFormFieldModule, MatSelectModule],
+  imports: [ReactiveFormsModule, MatFormFieldModule, MatSelectModule, MatRadioModule],
   template: `
     <form class="adm-dialog" [formGroup]="form" (ngSubmit)="save()">
       <h2>Create Course</h2>
@@ -112,6 +113,66 @@ interface ICourseDialogContext {
         </mat-form-field>
       </label>
 
+      <fieldset class="adm-choice">
+        <legend>Course Type</legend>
+        <mat-radio-group formControlName="assessmentShape" aria-label="Course type">
+          <label class="adm-choice__opt">
+            <mat-radio-button value="THEORY"></mat-radio-button>
+            <span>
+              <span class="adm-choice__title">Test and exam</span>
+              <span class="adm-choice__hint">The usual shape — with an optional practical score.</span>
+            </span>
+          </label>
+          <label class="adm-choice__opt">
+            <mat-radio-button value="PRACTICAL_ONLY"></mat-radio-button>
+            <span>
+              <span class="adm-choice__title">Practical only</span>
+              <span class="adm-choice__hint">Records a practical score alone — the lecturer is shown no test or exam column.</span>
+            </span>
+          </label>
+        </mat-radio-group>
+      </fieldset>
+
+      <fieldset class="adm-choice">
+        <legend>Classification <small>in the department's curriculum</small></legend>
+        <mat-radio-group formControlName="classification" aria-label="Classification">
+          <label class="adm-choice__opt">
+            <mat-radio-button value="COMPULSORY"></mat-radio-button>
+            <span>
+              <span class="adm-choice__title">Compulsory</span>
+              <span class="adm-choice__hint">Every student at this level takes it.</span>
+            </span>
+          </label>
+          <label class="adm-choice__opt">
+            <mat-radio-button value="ELECTIVE"></mat-radio-button>
+            <span>
+              <span class="adm-choice__title">Elective</span>
+              <span class="adm-choice__hint">Students choose it, on its own or from a group.</span>
+            </span>
+          </label>
+          <label class="adm-choice__opt">
+            <mat-radio-button value="SIWES"></mat-radio-button>
+            <span>
+              <span class="adm-choice__title">SIWES</span>
+              <span class="adm-choice__hint">Industrial training — exempt from the unit cap.</span>
+            </span>
+          </label>
+        </mat-radio-group>
+      </fieldset>
+
+      @if (form.controls.classification.value === 'ELECTIVE') {
+        <label>
+          Elective Group (optional — "choose N of these")
+          <input class="adm-input" formControlName="electiveGroup" placeholder="e.g 300-1-A (leave empty for a free elective)" />
+        </label>
+        @if (form.controls.electiveGroup.value) {
+          <label>
+            Minimum required from the group
+            <input class="adm-input" style="width: 90px" type="number" min="1" formControlName="groupMinRequired" />
+          </label>
+        }
+      }
+
       <label>
         Course Load
         <span style="display: flex; align-items: center; gap: 10px">
@@ -127,30 +188,6 @@ interface ICourseDialogContext {
           <button type="button" class="adm-btn" style="padding: 8px 12px" (click)="bump(1)">＋</button>
         </span>
       </label>
-
-      <label>
-        Classification (in the department's curriculum)
-        <mat-form-field appearance="outline" class="adm-mat">
-          <mat-select formControlName="classification">
-            <mat-option value="COMPULSORY">COMPULSORY</mat-option>
-            <mat-option value="ELECTIVE">ELECTIVE</mat-option>
-            <mat-option value="SIWES">SIWES</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </label>
-
-      @if (form.controls.classification.value === 'ELECTIVE') {
-        <label>
-          Elective Group (optional — "choose N of these")
-          <input class="adm-input" formControlName="electiveGroup" placeholder="e.g 300-1-A (leave empty for a free elective)" />
-        </label>
-        @if (form.controls.electiveGroup.value) {
-          <label>
-            Minimum required from the group
-            <input class="adm-input" style="width: 90px" type="number" min="1" formControlName="groupMinRequired" />
-          </label>
-        }
-      }
 
       <div class="adm-dialog__actions">
         <button type="button" class="adm-btn adm-btn--outline" (click)="ref.close()">Cancel</button>
@@ -181,6 +218,7 @@ export class CourseDialog {
       nonNullable: true,
       validators: [Validators.required, Validators.min(1), Validators.max(12)],
     }),
+    assessmentShape: new FormControl('THEORY', { nonNullable: true }),
     classification: new FormControl('COMPULSORY', { nonNullable: true }),
     electiveGroup: new FormControl('', { nonNullable: true }),
     groupMinRequired: new FormControl(1, { nonNullable: true }),
@@ -238,6 +276,7 @@ export class Courses implements OnInit {
   readonly semesters = SEMESTERS;
 
   schools = signal<ISchool[]>([]);
+  faculties = signal<IFaculty[]>([]);
   departments = signal<IDepartment[]>([]);
   rows = signal<ICurriculumRow[]>([]);
   report = signal<ICurriculumImportReport | null>(null);
@@ -245,6 +284,7 @@ export class Courses implements OnInit {
   importing = signal(false);
 
   selectedSchoolId = signal('');
+  selectedFacultyId = signal('');
   selectedDepartmentId = signal('');
   selectedLevel = signal<string>('100');
   selectedSemester = signal<string>('1ST SEMESTER');
@@ -259,6 +299,30 @@ export class Courses implements OnInit {
         const first = resp.data?.[0];
         if (first) {
           this.selectedSchoolId.set(first._id);
+          this.loadFaculties();
+        }
+      },
+    });
+  }
+
+  /**
+   * School → Faculty → Department.
+   *
+   * This used to flatten every faculty's departments into one list, which
+   * meant scrolling an entire institution's departments to find one — and,
+   * because each faculty was fetched in parallel and merged as it arrived,
+   * the list order (and the auto-selected first item) was nondeterministic.
+   */
+  private loadFaculties(): void {
+    this.faculties.set([]);
+    this.departments.set([]);
+    this.api.faculties(this.selectedSchoolId()).subscribe({
+      next: (resp) => {
+        const faculties = resp.data ?? [];
+        this.faculties.set(faculties);
+        const first = faculties[0];
+        if (first) {
+          this.selectedFacultyId.set(first._id);
           this.loadDepartments();
         }
       },
@@ -266,24 +330,17 @@ export class Courses implements OnInit {
   }
 
   private loadDepartments(): void {
-    // Flatten every faculty's departments for the selected school.
-    this.api.faculties(this.selectedSchoolId()).subscribe({
+    this.departments.set([]);
+    const facultyId = this.selectedFacultyId();
+    if (!facultyId) return;
+    this.api.departments(facultyId).subscribe({
       next: (resp) => {
-        const faculties = resp.data ?? [];
-        this.departments.set([]);
-        for (const faculty of faculties) {
-          this.api.departments(faculty._id).subscribe({
-            next: (departmentResp) => {
-              this.departments.update((current) => {
-                const merged = [...current, ...(departmentResp.data ?? [])];
-                if (!this.selectedDepartmentId() && merged.length > 0) {
-                  this.selectedDepartmentId.set(merged[0]._id);
-                  this.load();
-                }
-                return merged;
-              });
-            },
-          });
+        const departments = resp.data ?? [];
+        this.departments.set(departments);
+        const first = departments[0];
+        if (first) {
+          this.selectedDepartmentId.set(first._id);
+          this.load();
         }
       },
     });
@@ -291,6 +348,14 @@ export class Courses implements OnInit {
 
   onSchoolChange(schoolId: string): void {
     this.selectedSchoolId.set(schoolId);
+    this.selectedFacultyId.set('');
+    this.selectedDepartmentId.set('');
+    this.rows.set([]);
+    this.loadFaculties();
+  }
+
+  onFacultyChange(facultyId: string): void {
+    this.selectedFacultyId.set(facultyId);
     this.selectedDepartmentId.set('');
     this.rows.set([]);
     this.loadDepartments();

@@ -323,6 +323,12 @@ body {
   min-width: min(440px, 86vw);
   padding: 28px;
 
+  // The form IS the dialog body, so it has to do its own scrolling — without
+  // this the fields simply overflow and the actions are cut off the bottom of
+  // the screen with no way to reach them.
+  max-height: 85vh;
+  overflow-y: auto;
+
   h2 { margin: 0; font-size: 1.125rem; font-weight: 700; }
   > p { margin: 0 0 8px; color: #6b7280; font-size: 0.8125rem; }
 
@@ -336,11 +342,83 @@ body {
     color: #374151;
   }
 
+  // Pinned to the foot of the scroll area so Create is always reachable,
+  // however long the form gets.
   .adm-dialog__actions {
+    position: sticky;
+    bottom: -28px;
     display: flex;
     justify-content: flex-end;
     gap: 12px;
     margin-top: 24px;
+    padding: 16px 0 0;
+    background: #fff;
+    box-shadow: 0 -8px 12px -8px rgb(0 0 0 / 12%);
+  }
+}
+
+// Radio groups for the choices a lecturer must not miss. Deliberately not a
+// select: a dropdown hides that a choice exists at all, so someone who does
+// not know to look never changes it. Every option is on screen at once.
+.adm-choice {
+  border: 0;
+  margin: 14px 0 0;
+  padding: 0;
+  min-width: 0;
+
+  legend {
+    padding: 0 0 8px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #374151;
+
+    small {
+      font-weight: 400;
+      color: #6b7280;
+    }
+  }
+
+  mat-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__opt {
+    display: flex;
+    // Centred rather than offset by a magic padding: Material's radio has its
+    // own touch target whose height we should not hard-code against.
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    padding: 10px 12px 10px 4px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+
+    &:hover { border-color: #bfdbfe; background: #f8fbff; }
+
+    span {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    // Matches `.adm-dialog label` — the form's own label weight. Hierarchy
+    // against the hint below comes from size and colour, not extra weight.
+    .adm-choice__title {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: #111827;
+    }
+
+    .adm-choice__hint {
+      font-size: 0.75rem;
+      font-weight: 400;
+      line-height: 1.45;
+      color: #6b7280;
+    }
   }
 }
 
@@ -389,4 +467,11 @@ body {
 
 .reg-error {
   color: #b91c1c;
+}
+
+/* Marks a required field's label. Used where leaving the field blank would put
+   a gap on an official document (faculty / department codes). */
+.adm-req {
+  color: #d8315b;
+  font-weight: 500;
 }

@@ -28,24 +28,54 @@ import { SkeletonTable } from '../../shared/skeleton';
 
 export interface IFacultyDialogResult {
   name: string;
-  code?: string;
+  /** Short code printed on official documents (SOPS). Required. */
+  code: string;
+  /** Which school the faculty belongs to — chosen in the dialog, never guessed. */
+  schoolId: string;
+}
+
+export interface IFacultyDialogData {
+  faculty: IFaculty | null;
+  schools: ISchool[];
+  /** Preselected when the caller already has a school in context. */
+  schoolId?: string;
 }
 
 @Component({
   selector: 'app-faculty-dialog',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, MatFormFieldModule, MatSelectModule],
   template: `
     <form class="adm-dialog" [formGroup]="form" (ngSubmit)="save()">
       <h2>{{ faculty ? 'Edit Faculty' : 'Create Faculty' }}</h2>
       <p>Faculties group departments within an institution</p>
+
+      <!--
+        Creating: the school is an explicit choice. It used to be inferred
+        from whatever school happened to be first, which silently filed the
+        faculty under the wrong institution. Editing: a faculty does not move
+        between schools, so the field is not offered.
+      -->
+      @if (!faculty) {
+        <label>
+          School
+          <mat-form-field appearance="outline" class="adm-mat">
+            <mat-select formControlName="schoolId" placeholder="Choose a school">
+              @for (school of context.schools; track school._id) {
+                <mat-option [value]="school._id">{{ school.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </label>
+      }
+
       <label>
         Faculty Name
         <input class="adm-input" formControlName="name" placeholder="e.g School of Physical Sciences" />
       </label>
       <label>
-        Code
+        Code <span class="adm-req">*</span>
         <input class="adm-input" formControlName="code" placeholder="e.g SOPS" />
       </label>
       <div class="adm-dialog__actions">
@@ -59,20 +89,35 @@ export interface IFacultyDialogResult {
 })
 export class FacultyDialog {
   readonly ref = inject(MatDialogRef<FacultyDialog, IFacultyDialogResult>);
-  readonly faculty = inject<IFaculty | null>(MAT_DIALOG_DATA);
+  readonly context = inject<IFacultyDialogData>(MAT_DIALOG_DATA);
+  readonly faculty = this.context.faculty;
 
   form = new FormGroup({
+    schoolId: new FormControl(this.context.schoolId ?? '', {
+      nonNullable: true,
+      // Required only when creating — an edit keeps its existing school.
+      validators: this.context.faculty ? [] : [Validators.required],
+    }),
     name: new FormControl(this.faculty?.name ?? '', {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(3)],
     }),
-    code: new FormControl(this.faculty?.code ?? '', { nonNullable: true }),
+    // Required: FUTO's Official Grade Report prints this code, and a
+    // faculty without one leaves a blank on a signed academic record.
+    code: new FormControl(this.faculty?.code ?? '', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.maxLength(10)],
+    }),
   });
 
   save(): void {
     if (this.form.invalid) return;
-    const { name, code } = this.form.getRawValue();
-    this.ref.close({ name: name.trim(), code: code.trim() || undefined });
+    const { name, code, schoolId } = this.form.getRawValue();
+    this.ref.close({
+      name: name.trim(),
+      code: code.trim().toUpperCase(),
+      schoolId,
+    });
   }
 }
 
@@ -127,15 +172,25 @@ export class Faculties implements OnInit {
   }
 
   create(): void {
-    if (!this.selectedSchoolId()) return;
     this.dialog
-      .open(FacultyDialog, { data: null })
+      .open(FacultyDialog, {
+        data: {
+          faculty: null,
+          schools: this.schools(),
+          schoolId: this.selectedSchoolId(),
+        },
+      })
       .afterClosed()
       .subscribe((result: IFacultyDialogResult | undefined) => {
         if (!result) return;
-        this.api.createFaculty(this.selectedSchoolId(), result).subscribe({
+        // Honour the school chosen in the dialog, not the page filter — they
+        // can legitimately differ.
+        this.api.createFaculty(result.schoolId, result).subscribe({
           next: () => {
             this.toast.success('Faculty created.');
+            if (result.schoolId !== this.selectedSchoolId()) {
+              this.selectedSchoolId.set(result.schoolId);
+            }
             this.load();
           },
           error: (err) =>
@@ -146,7 +201,9 @@ export class Faculties implements OnInit {
 
   edit(faculty: IFaculty): void {
     this.dialog
-      .open(FacultyDialog, { data: faculty })
+      .open(FacultyDialog, {
+        data: { faculty, schools: this.schools(), schoolId: this.selectedSchoolId() },
+      })
       .afterClosed()
       .subscribe((result: IFacultyDialogResult | undefined) => {
         if (!result) return;
