@@ -1,5 +1,18 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+} from '@angular/core';
+import {
+  ActivatedRoute,
+  NavigationEnd,
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+} from '@angular/router';
+import { filter } from 'rxjs';
 import { AuthService } from '../core/services/auth.service';
 
 interface INavItem {
@@ -23,8 +36,39 @@ interface INavItem {
 })
 export class Layout {
   private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly account = this.auth.account;
+
+  /**
+   * Whether the routed page owns the viewport.
+   *
+   * Every other admin page is a document that scrolls inside the shell's
+   * padding. The support desk is an application: two panes that scroll
+   * internally, which need a definite height and no padding around them.
+   * Declared by the route so adding a second such page changes nothing here.
+   */
+  readonly fullBleed = signal<boolean>(false);
+
+  constructor() {
+    this.readFullBleed();
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe(() => this.readFullBleed());
+  }
+
+  private readFullBleed(): void {
+    let node: ActivatedRoute | null = this.route;
+    let wants = false;
+    while (node) {
+      // `snapshot` is not populated on a child route until the navigation that
+      // activates it has finished, and this runs once before that.
+      if (node.snapshot?.data?.['fullBleed'] === true) wants = true;
+      node = node.firstChild;
+    }
+    this.fullBleed.set(wants);
+  }
 
   readonly nav: INavItem[] = [
     {
@@ -86,6 +130,12 @@ export class Layout {
       route: '/registration',
       activeIcon: 'icons/menu/result-management-active.svg',
       inactiveIcon: 'icons/menu/result-management-inactive.svg',
+    },
+    {
+      label: 'Support',
+      route: '/support',
+      activeIcon: 'icons/menu/messages-active.svg',
+      inactiveIcon: 'icons/menu/messages-inactive.svg',
     },
     {
       label: 'Settings',
