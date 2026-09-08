@@ -133,3 +133,26 @@
     min-width: 0;
   }
 }
+
+/* A page that runs its own scrolling — the support desk. The shell stops being
+   a document that grows and becomes a fixed frame the page fills exactly, so
+   the ticket queue and the conversation each scroll on their own instead of
+   pushing the whole window down. */
+.shell--full-bleed {
+  height: 100dvh;
+  overflow: hidden;
+
+  .shell__main {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100dvh;
+  }
+
+  .shell__content {
+    flex: 1 1 auto;
+    padding: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+}

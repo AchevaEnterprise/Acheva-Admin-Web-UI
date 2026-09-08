@@ -1,0 +1,81 @@
+@if (showHeader() && conversation(); as thread) {
+  <header class="thread-head">
+    <span
+      class="avatar"
+      [class.avatar--broadcast]="thread.kind === 'ANNOUNCEMENT'"
+      aria-hidden="true"
+    >
+      {{ initials(thread) }}
+    </span>
+    <div>
+      <p class="acva-para-2 fw-500 m-0">{{ thread.title }}</p>
+      @if (thread.kind === 'ANNOUNCEMENT') {
+        <p class="acva-caption text-neutral-500 m-0">
+          Announcement · {{ thread.audienceLabel }}
+        </p>
+      } @else if (thread.subtitle) {
+        <p class="acva-caption text-neutral-500 m-0">{{ thread.subtitle }}</p>
+      }
+    </div>
+  </header>
+}
+
+<div class="bubbles" #scroller>
+  @if (loading()) {
+    <div class="grid gap-3 p-4">
+      <app-skeleton width="60%" height="2.5rem" />
+      <app-skeleton width="45%" height="2.5rem" />
+      <app-skeleton width="70%" height="2.5rem" />
+    </div>
+  } @else if (messages().length === 0) {
+    <p class="thread-empty acva-para-1">
+      <ng-content select="[emptyState]" />
+    </p>
+  } @else {
+    @for (message of messages(); track trackById($index, message)) {
+      <div
+        class="bubble"
+        [class.bubble--mine]="message.mine"
+        [class.bubble--pending]="message.pending"
+        [class.bubble--failed]="message.failed"
+      >
+        <p class="bubble__body acva-para-1">{{ message.body }}</p>
+        <span class="bubble__meta acva-footer">
+          {{ message.createdAt | date: 'shortTime' }}
+          @if (message.pending) {
+            · sending
+          } @else if (message.failed) {
+            · not sent
+          } @else {
+            <app-message-ticks [state]="tickFor(message)" />
+          }
+        </span>
+      </div>
+    }
+  }
+</div>
+
+@if (conversation()?.repliesDisabled) {
+  <p class="closed acva-para-1">
+    This is an announcement — replies are not enabled.
+  </p>
+} @else {
+  <form class="composer" (ngSubmit)="submit()">
+    <textarea
+      class="composer__input acva-para-1"
+      rows="1"
+      [placeholder]="placeholder()"
+      [attr.aria-label]="placeholder()"
+      [value]="draft()"
+      (input)="draft.set($any($event.target).value)"
+      (keydown)="onDraftKey($event)"
+    ></textarea>
+    <button
+      type="submit"
+      class="composer__send acva-para-1"
+      [disabled]="!draft().trim()"
+    >
+      Send
+    </button>
+  </form>
+}

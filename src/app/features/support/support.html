@@ -1,0 +1,141 @@
+<section class="desk">
+  <!-- ── The queue ────────────────────────────────────────────────────────── -->
+  <aside class="desk__queue">
+    <header class="queue-head">
+      <div>
+        <h1 class="acva-para-3 fw-600 m-0">Support</h1>
+        <p class="acva-caption text-neutral-500 m-0">
+          @if (waiting() > 0) {
+            {{ waiting() }} waiting on a reply
+          } @else {
+            Everything answered
+          }
+        </p>
+      </div>
+    </header>
+
+    <div class="queue-controls">
+      <input
+        type="search"
+        class="queue-search acva-para-1"
+        placeholder="Search by name or message"
+        aria-label="Search tickets"
+        [value]="search()"
+        (input)="search.set($any($event.target).value)"
+      />
+      <label class="queue-toggle acva-caption">
+        <input
+          type="checkbox"
+          [checked]="unansweredOnly()"
+          (change)="unansweredOnly.set($any($event.target).checked)"
+        />
+        Only those waiting on us
+      </label>
+    </div>
+
+    <div class="queue-scroll">
+      @if (loadingQueue()) {
+        @for (row of [1, 2, 3, 4, 5]; track row) {
+          <div class="row-skeleton">
+            <app-skeleton width="2.5rem" height="2.5rem" [circle]="true" />
+            <div class="row-skeleton__text">
+              <app-skeleton width="45%" height="0.85rem" />
+              <app-skeleton width="75%" height="0.75rem" />
+            </div>
+          </div>
+        }
+      } @else if (filtered().length === 0) {
+        <p class="queue-empty acva-para-1">
+          @if (search()) {
+            No ticket matches “{{ search() }}”.
+          } @else if (unansweredOnly()) {
+            Nothing is waiting on a reply.
+          } @else {
+            No support tickets yet. When somebody writes in from either portal,
+            it lands here.
+          }
+        </p>
+      } @else {
+        <ul class="tickets">
+          @for (ticket of filtered(); track trackById($index, ticket)) {
+            <li>
+              <button
+                type="button"
+                class="ticket"
+                [class.ticket--active]="active()?.id === ticket.id"
+                (click)="open(ticket)"
+              >
+                <span class="avatar" aria-hidden="true">
+                  {{ initials(ticket) }}
+                </span>
+                <span class="ticket__body">
+                  <span class="ticket__top">
+                    <span class="ticket__name acva-para-1">
+                      {{ ticket.title }}
+                    </span>
+                    @if (ticket.lastMessage?.at) {
+                      <span class="ticket__time acva-caption">
+                        {{ ticket.lastMessage?.at | date: 'shortTime' }}
+                      </span>
+                    }
+                  </span>
+                  @if (ticket.subtitle) {
+                    <span class="ticket__who acva-caption">
+                      {{ ticket.subtitle }}
+                    </span>
+                  }
+                  <span class="ticket__bottom">
+                    <span class="ticket__preview acva-caption">
+                      {{ ticket.lastMessage?.preview || 'No messages yet' }}
+                    </span>
+                    @if (ticket.unread > 0) {
+                      <span class="pill">{{ ticket.unread }}</span>
+                    }
+                  </span>
+                </span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  </aside>
+
+  <!-- ── The ticket ───────────────────────────────────────────────────────── -->
+  <div class="desk__thread">
+    @if (!active()) {
+      <div class="placeholder">
+        <p class="acva-para-2 fw-600 m-0">Pick a ticket</p>
+        <p class="acva-para-1 text-neutral-500 m-0">
+          Replies go out as “Acheva Support”, never under your own name.
+        </p>
+      </div>
+    } @else {
+      <header class="thread-head">
+        <span class="avatar" aria-hidden="true">{{ initials(active()!) }}</span>
+        <div>
+          <p class="acva-para-2 fw-600 m-0">{{ active()!.title }}</p>
+          @if (active()!.subtitle) {
+            <p class="acva-caption text-neutral-500 m-0">
+              {{ active()!.subtitle }}
+            </p>
+          }
+        </div>
+      </header>
+
+      <app-chat-thread
+        class="desk__chat"
+        [conversation]="active()"
+        [messages]="messages()"
+        [loading]="loadingThread()"
+        [showHeader]="false"
+        placeholder="Reply as Acheva Support"
+        (sendMessage)="send($event)"
+      >
+        <ng-container emptyState>
+          They have not written anything yet.
+        </ng-container>
+      </app-chat-thread>
+    }
+  </div>
+</section>

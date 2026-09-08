@@ -56,6 +56,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'support',
+        // Two panes that scroll internally — see `Layout.fullBleed`.
+        data: { fullBleed: true },
+        loadComponent: () =>
+          import('./features/support/support').then((m) => m.Support),
+      },
+      {
         path: 'settings',
         loadComponent: () =>
           import('./features/settings/settings').then((m) => m.Settings),
