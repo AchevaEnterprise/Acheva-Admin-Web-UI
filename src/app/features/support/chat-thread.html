@@ -32,24 +32,31 @@
       <ng-content select="[emptyState]" />
     </p>
   } @else {
-    @for (message of messages(); track trackById($index, message)) {
-      <div
-        class="bubble"
-        [class.bubble--mine]="message.mine"
-        [class.bubble--pending]="message.pending"
-        [class.bubble--failed]="message.failed"
-      >
-        <p class="bubble__body acva-para-1">{{ message.body }}</p>
-        <span class="bubble__meta acva-footer">
-          {{ message.createdAt | date: 'shortTime' }}
-          @if (message.pending) {
-            · sending
-          } @else if (message.failed) {
-            · not sent
-          } @else {
-            <app-message-ticks [state]="tickFor(message)" />
-          }
-        </span>
+    @for (day of days(); track trackByDay($index, day)) {
+      <div class="day">
+        <!-- Today · Yesterday · Monday · 24/09/2026 -->
+        <p class="day__label acva-caption">{{ day.label }}</p>
+
+        @for (message of day.messages; track trackById($index, message)) {
+          <div
+            class="bubble"
+            [class.bubble--mine]="message.mine"
+            [class.bubble--pending]="message.pending"
+            [class.bubble--failed]="message.failed"
+          >
+            <p class="bubble__body acva-para-1">{{ bodyOf(message) }}</p>
+            <span class="bubble__meta acva-footer">
+              {{ message.createdAt | date: 'shortTime' }}
+              @if (message.pending) {
+                · sending
+              } @else if (message.failed) {
+                · not sent
+              } @else {
+                <app-message-ticks [state]="tickFor(message)" />
+              }
+            </span>
+          </div>
+        }
       </div>
     }
   }

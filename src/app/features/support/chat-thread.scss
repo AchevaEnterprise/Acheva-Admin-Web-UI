@@ -53,6 +53,7 @@ $ground: #f7f9fb;
    every chat app does it — not stranded at the top of an empty rectangle.
    `margin-top: auto` on the first bubble rather than `justify-content:
    flex-end`, which clips the top of the list once it overflows. */
+
 .bubbles > :first-child {
   margin-top: auto;
 }
@@ -65,6 +66,32 @@ $ground: #f7f9fb;
   line-height: 1.5;
 }
 
+/* A day is its own flex column so `align-self` on a bubble still decides which
+   side it sits on — the bubbles are no longer direct children of `.bubbles`. */
+.day {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Centred pill, the way every chat app marks a change of day. `sticky` keeps
+   the heading visible while you scroll through a long day, which is the whole
+   reason it is there. */
+.day__label {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  align-self: center;
+  margin: 4px 0;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: #e8eef4;
+  color: #4a6076;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
 .bubble {
   max-width: min(68%, 520px);
   padding: 8px 12px;
@@ -72,6 +99,7 @@ $ground: #f7f9fb;
   background: #fff;
   border: 1px solid $border;
   align-self: flex-start;
+
   /* A long unbroken string (a URL, a reg number) must wrap, not widen. */
   overflow-wrap: anywhere;
 }
@@ -81,6 +109,7 @@ $ground: #f7f9fb;
   background: $brand;
   border-color: $brand;
   color: #fff;
+
   /* A blue read-tick on a blue bubble would be the one state nobody can see. */
   --tick-read: #fff;
 }
@@ -110,7 +139,7 @@ $ground: #f7f9fb;
 }
 
 .bubble--mine .bubble__meta {
-  color: rgba(255, 255, 255, 0.82);
+  color: rgb(255 255 255 / 82%);
 }
 
 .bubble--failed .bubble__meta {

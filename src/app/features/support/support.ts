@@ -19,6 +19,8 @@ import {
   IStreamEvent,
 } from './messaging.model';
 import { MessagingService } from './messaging.service';
+import { listTimestamp } from './message-day';
+import { readablePreview } from './readable-text';
 
 /**
  * The support desk: every ticket raised from either portal, and the reply box.
@@ -271,6 +273,16 @@ export class Support implements OnInit {
       .slice(0, 2)
       .map((part) => part[0]?.toUpperCase() ?? '')
       .join('');
+  }
+
+  /** A preview safe to print — never raw ciphertext. See `readable-text.ts`. */
+  previewOf(conversation: IConversationSummary): string {
+    return readablePreview(conversation.lastMessage?.preview);
+  }
+
+  /** Time for today's tickets, a day for anything older. */
+  stampFor(ticket: IConversationSummary): string {
+    return listTimestamp(ticket.lastMessage?.at);
   }
 
   trackById = (_: number, item: { id: string }) => item.id;

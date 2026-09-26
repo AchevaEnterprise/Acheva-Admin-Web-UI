@@ -75,7 +75,7 @@
                     </span>
                     @if (ticket.lastMessage?.at) {
                       <span class="ticket__time acva-caption">
-                        {{ ticket.lastMessage?.at | date: 'shortTime' }}
+                        {{ stampFor(ticket) }}
                       </span>
                     }
                   </span>
@@ -86,7 +86,7 @@
                   }
                   <span class="ticket__bottom">
                     <span class="ticket__preview acva-caption">
-                      {{ ticket.lastMessage?.preview || 'No messages yet' }}
+                      {{ previewOf(ticket) }}
                     </span>
                     @if (ticket.unread > 0) {
                       <span class="pill">{{ ticket.unread }}</span>

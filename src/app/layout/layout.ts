@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   inject,
   signal,
 } from '@angular/core';
@@ -14,6 +15,7 @@ import {
 } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from '../core/services/auth.service';
+import { MessagingService } from '../features/support/messaging.service';
 
 interface INavItem {
   label: string;
@@ -38,6 +40,17 @@ export class Layout {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
+
+  /**
+   * The support desk's unread count, read straight off the messaging service.
+   *
+   * The service owns the live stream for the whole session — started here
+   * rather than by the Support page, so a ticket arriving while an admin is on
+   * Students or Logs lights the badge immediately instead of waiting for them
+   * to wander onto the right page.
+   */
+  readonly messaging = inject(MessagingService);
 
   readonly account = this.auth.account;
 
@@ -52,6 +65,9 @@ export class Layout {
   readonly fullBleed = signal<boolean>(false);
 
   constructor() {
+    this.messaging.start();
+    this.destroyRef.onDestroy(() => this.messaging.stop());
+
     this.readFullBleed();
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
