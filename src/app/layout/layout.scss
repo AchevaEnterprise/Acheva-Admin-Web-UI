@@ -58,6 +58,33 @@
     }
   }
 
+  // The label takes the slack so the unread badge sits hard against the right
+  // edge of the pill, where the eye already looks for a count.
+  &__item-label {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  // Brand blue, not red: a support queue is work waiting, not an error.
+  &__badge {
+    flex: 0 0 auto;
+    min-width: 20px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: #2793ff;
+    color: #fff;
+    font-size: 0.7rem;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  // Inside the active pill the background is already brand blue, so a blue
+  // badge would vanish into it — invert instead.
+  &__item--active &__badge {
+    background: #fff;
+    color: #12508f;
+  }
+
   &__logout {
     display: flex;
     align-items: center;

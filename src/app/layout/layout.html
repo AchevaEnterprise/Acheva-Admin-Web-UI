@@ -9,9 +9,19 @@
           [routerLink]="item.route"
           routerLinkActive="shell__item--active"
           #rla="routerLinkActive"
+          [attr.aria-label]="
+            item.route === '/support' && messaging.unreadTotal() > 0
+              ? item.label + ', ' + messaging.unreadTotal() + ' waiting on a reply'
+              : null
+          "
         >
           <img [src]="rla.isActive ? item.activeIcon : item.inactiveIcon" alt="" width="20" height="20" />
-          <span>{{ item.label }}</span>
+          <span class="shell__item-label">{{ item.label }}</span>
+          @if (item.route === '/support' && messaging.unreadTotal() > 0) {
+            <span class="shell__badge" aria-hidden="true">
+              {{ messaging.unreadLabel() }}
+            </span>
+          }
         </a>
       }
     </nav>
