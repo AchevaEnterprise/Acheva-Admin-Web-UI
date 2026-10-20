@@ -56,6 +56,10 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'fees',
+        loadComponent: () => import('./features/fees/fees').then((m) => m.Fees),
+      },
+      {
         path: 'support',
         // Two panes that scroll internally — see `Layout.fullBleed`.
         data: { fullBleed: true },
