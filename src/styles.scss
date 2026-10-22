@@ -475,3 +475,161 @@ body {
   color: #d8315b;
   font-weight: 500;
 }
+
+/* ── Fees & revenue ────────────────────────────────────────────────────────
+   The money page. A split is easier to get wrong than to read, so the
+   arithmetic is rendered rather than left implied by a percentage. */
+
+.fees {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 720px;
+}
+
+.fees__head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.fees__row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+/* A money input reads as money: the unit sits inside the field, not beside
+   it as a floating label the eye has to pair up. */
+.fees__money {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.fees__money:focus-within {
+  border-color: #2793ff;
+  box-shadow: 0 0 0 3px rgb(39 147 255 / 15%);
+}
+
+.fees__prefix,
+.fees__suffix {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.fees__input {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 4px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 0.875rem;
+  color: #111827;
+}
+
+.fees__input:focus {
+  outline: none;
+}
+
+/* Strip the spinner: a fee is typed, not nudged, and the arrows shrink the
+   usable width of an already narrow field. */
+.fees__input::-webkit-outer-spin-button,
+.fees__input::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.fees__input[type='number'] {
+  appearance: textfield;
+}
+
+.fees__split {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 10px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+
+.fees__split-total {
+  color: #6b7280;
+  margin-bottom: 10px;
+}
+
+/* One bar, two shares. Proportion is the thing being decided, and a number
+   alone does not show proportion. */
+.fees__bar {
+  height: 8px;
+  border-radius: 999px;
+  background: #2793ff;
+  overflow: hidden;
+}
+
+.fees__bar-dept {
+  display: block;
+  height: 100%;
+  background: #93c5fd;
+}
+
+.fees__legend {
+  display: flex;
+  gap: 32px;
+  margin: 12px 0 0;
+}
+
+.fees__legend dt {
+  color: #6b7280;
+  margin-bottom: 2px;
+}
+
+.fees__legend dt::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 2px;
+  background: #93c5fd;
+}
+
+.fees__legend div:last-child dt::before {
+  background: #2793ff;
+}
+
+.fees__legend dd {
+  margin: 0;
+  color: #111827;
+}
+
+.fees__note {
+  margin: 16px 0 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #f3f4f6;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.fees__note--warn {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.fees__note--error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.fees__foot {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}

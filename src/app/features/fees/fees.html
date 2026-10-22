@@ -1,0 +1,161 @@
+<div class="adm-page-head">
+  <div>
+    <h2 class="acva-heading-5 fw-600 m-0">Fees &amp; revenue</h2>
+    <p class="acva-para-1 text-neutral-500 m-0">
+      What Acheva charges, and what each department keeps. Departmental dues
+      themselves are set by the Head of Department, not here.
+    </p>
+  </div>
+</div>
+
+@if (loading()) {
+  <section class="adm-card" style="max-width: 720px">
+    <p class="acva-para-1 text-neutral-500 m-0">Loading…</p>
+  </section>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="save()" class="fees">
+    <!-- ── Transcript ──────────────────────────────────────────────────── -->
+    <section class="adm-card">
+      <header class="fees__head">
+        <h3 class="acva-para-2 fw-500 m-0">Transcript download</h3>
+        <p class="acva-caption text-neutral-500 m-0">
+          Charged each time a student downloads a transcript. Acheva’s
+          product — the department takes a share of every one.
+        </p>
+      </header>
+
+      <div class="fees__row">
+        <div class="adm-field adm-field--inline">
+          <label class="adm-field__label" for="fee-transcript">
+            Fee per download
+          </label>
+          <div class="fees__money">
+            <span class="fees__prefix">₦</span>
+            <input
+              id="fee-transcript"
+              class="fees__input"
+              type="number"
+              min="0"
+              step="0.01"
+              formControlName="transcriptFeeNaira"
+            />
+          </div>
+        </div>
+
+        <div class="adm-field adm-field--inline">
+          <label class="adm-field__label" for="fee-share">
+            Department’s share
+          </label>
+          <div class="fees__money">
+            <input
+              id="fee-share"
+              class="fees__input"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              formControlName="transcriptDepartmentSharePercent"
+            />
+            <span class="fees__suffix">%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- The worked split: the same arithmetic the server does, so nobody
+           has to trust a percentage they cannot see the effect of. -->
+      @if (transcriptFeeIsZero()) {
+        <p class="fees__note fees__note--warn acva-caption">
+          A fee of zero means transcript downloads are <strong>not charged
+          for</strong>. Students will be refused with a “not currently charged
+          for” message rather than given a free download.
+        </p>
+      } @else {
+        <div class="fees__split">
+          <div class="fees__split-total acva-caption">
+            A student pays
+            <strong>{{ money(transcriptSplit().total) }}</strong>
+          </div>
+          <div class="fees__bar" aria-hidden="true">
+            <span
+              class="fees__bar-dept"
+              [style.width.%]="
+                (transcriptSplit().department / transcriptSplit().total) * 100
+              "
+            ></span>
+          </div>
+          <dl class="fees__legend">
+            <div>
+              <dt class="acva-caption">Department</dt>
+              <dd class="acva-para-2">
+                {{ money(transcriptSplit().department) }}
+              </dd>
+            </div>
+            <div>
+              <dt class="acva-caption">Acheva</dt>
+              <dd class="acva-para-2">
+                {{ money(transcriptSplit().platform) }}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      }
+    </section>
+
+    <!-- ── Dues ────────────────────────────────────────────────────────── -->
+    <section class="adm-card">
+      <header class="fees__head">
+        <h3 class="acva-para-2 fw-500 m-0">Acheva’s fee on departmental dues</h3>
+        <p class="acva-caption text-neutral-500 m-0">
+          A flat amount taken from each dues payment. The <strong>Head of
+          Department sets the dues themselves</strong> — this is only our cut
+          of whatever they charge.
+        </p>
+      </header>
+
+      <div class="adm-field adm-field--inline">
+        <label class="adm-field__label" for="fee-dues">Fee per payment</label>
+        <div class="fees__money">
+          <span class="fees__prefix">₦</span>
+          <input
+            id="fee-dues"
+            class="fees__input"
+            type="number"
+            min="0"
+            step="0.01"
+            formControlName="duesPlatformFeeNaira"
+          />
+        </div>
+      </div>
+
+      @if (duesExample().swallowsCharge) {
+        <p class="fees__note fees__note--error acva-caption">
+          This fee is not less than a typical
+          {{ money(duesExample().charge) }} due — the department would receive
+          nothing. The server refuses this, so it cannot be saved.
+        </p>
+      } @else {
+        <p class="fees__note acva-caption">
+          On a {{ money(duesExample().charge) }} due, the department receives
+          <strong>{{ money(duesExample().department) }}</strong> and Acheva
+          takes <strong>{{ money(duesExample().platform) }}</strong>.
+          Flat rather than a percentage: the cost of collecting a payment does
+          not grow with its size.
+        </p>
+      }
+    </section>
+
+    <footer class="fees__foot">
+      <button
+        type="submit"
+        class="adm-btn"
+        [disabled]="!canSave() || form.invalid"
+      >
+        {{ saving() ? 'Saving…' : 'Save fees' }}
+      </button>
+      <span class="acva-caption text-neutral-500">
+        Applies to new payments only. Anything already paid keeps the figures
+        it was charged under.
+      </span>
+    </footer>
+  </form>
+}

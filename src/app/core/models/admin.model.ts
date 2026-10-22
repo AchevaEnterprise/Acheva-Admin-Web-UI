@@ -111,3 +111,26 @@ export interface ICreatedInvite {
   readonly expiresAt: string;
   readonly inviteLink: string;
 }
+
+/**
+ * Acheva's own commercial settings — the figures WE own.
+ *
+ * Note what is NOT here: the departmental dues amount. A Head of Department
+ * sets what their department charges; this is only Acheva's cut of it, plus
+ * the transcript fee, which is ours end to end.
+ *
+ * Amounts are KOBO. See `core/naira.ts` for the only place they meet naira.
+ */
+export interface IPlatformSettings {
+  readonly transcriptFeeKobo: number;
+  readonly transcriptDepartmentSharePercent: number;
+  readonly duesPlatformFeeKobo: number;
+  readonly updatedBy?: string | null;
+  readonly updatedAt?: string;
+}
+
+export interface IUpdatePlatformSettings {
+  readonly transcriptFeeKobo?: number;
+  readonly transcriptDepartmentSharePercent?: number;
+  readonly duesPlatformFeeKobo?: number;
+}

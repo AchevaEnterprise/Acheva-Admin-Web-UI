@@ -148,6 +148,12 @@ export class Layout {
       inactiveIcon: 'icons/menu/result-management-inactive.svg',
     },
     {
+      label: 'Fees',
+      route: '/fees',
+      activeIcon: 'icons/menu/dues-management-active.svg',
+      inactiveIcon: 'icons/menu/dues-management-inactive.svg',
+    },
+    {
       label: 'Support',
       route: '/support',
       activeIcon: 'icons/menu/messages-active.svg',
