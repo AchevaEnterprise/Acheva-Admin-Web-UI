@@ -59,8 +59,21 @@ export class Login {
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: () => void this.router.navigate(['/dashboard']),
-        error: (err: { error?: { message?: string } }) =>
-          this.toast.error(err?.error?.message ?? 'Sign in failed.'),
+        error: (err: { status?: number; error?: { message?: unknown } }) => {
+          // Unknown email (404) and wrong password (400) read the same — the
+          // raw 404 text was "user not found with info: <email>", which told
+          // a stranger which addresses are admins.
+          const message = err?.error?.message;
+          if (err?.status === 404 || err?.status === 400) {
+            this.toast.error('Incorrect email or password.');
+          } else if (err?.status === 429) {
+            this.toast.error('Too many attempts. Wait a minute, then try again.');
+          } else if (err?.status === 0) {
+            this.toast.error('Could not reach Acheva. Check your connection and try again.');
+          } else {
+            this.toast.error(typeof message === 'string' ? message : 'Sign in failed.');
+          }
+        },
       });
   }
 }
