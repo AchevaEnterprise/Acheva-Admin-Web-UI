@@ -29,7 +29,14 @@ export class AuthService {
 
   get isAuthenticated(): boolean {
     const token = this.token;
-    return !!token && !this.jwt.isTokenExpired(token);
+    if (!token) return false;
+    // A token that is not a JWT at all makes the helper THROW, failing the
+    // route guard on a blank page. Unreadable means signed out.
+    try {
+      return !this.jwt.isTokenExpired(token);
+    } catch {
+      return false;
+    }
   }
 
   signIn(email: string, password: string): Observable<IAPIResponse<ISignInResponse>> {
