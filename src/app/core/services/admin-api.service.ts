@@ -247,6 +247,8 @@ export class AdminApiService {
       promotedByLevel: Record<string, number>;
       finalLevelUntouched: number;
       advisorsRemapped: number;
+      /** Approved department transfers carried out as the session closed. */
+      transfersApplied?: number;
     }>
   > {
     return this.http.post<
@@ -256,6 +258,7 @@ export class AdminApiService {
         promotedByLevel: Record<string, number>;
         finalLevelUntouched: number;
         advisorsRemapped: number;
+        transfersApplied?: number;
       }>
     >(`${this.base}/school-settings/rollover?schoolId=${schoolId}`, body);
   }

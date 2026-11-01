@@ -112,8 +112,10 @@ export class Settings implements OnInit {
       message:
         `Every student below their department's final level is promoted one ` +
         `level (100→200→…), Course Advisor cohort mappings are recomputed, ` +
-        `and ${toSession} · 1ST SEMESTER becomes the active session. Final-level ` +
-        `students are left untouched. This cannot be undone from the UI.`,
+        `every department transfer approved for ${settings.activeSession} ` +
+        `takes effect, and ${toSession} · 1ST SEMESTER becomes the active ` +
+        `session. Final-level students are left untouched. This cannot be ` +
+        `undone from the UI.`,
       confirmLabel: 'Advance session',
       destructive: true,
     };
@@ -138,7 +140,8 @@ export class Settings implements OnInit {
               this.toast.success(
                 `Now in ${s.toSession}. Promoted — ${moves || 'none'} · ` +
                   `${s.finalLevelUntouched} final-level untouched · ` +
-                  `${s.advisorsRemapped} advisors remapped.`,
+                  `${s.advisorsRemapped} advisors remapped · ` +
+                  `${s.transfersApplied ?? 0} approved transfer(s) carried out.`,
               );
               this.load();
             },
