@@ -1,0 +1,274 @@
+<div class="adm-page-head">
+  <div>
+    <h2 class="acva-heading-5 fw-500 m-0">School fees</h2>
+    <p class="acva-para-1 text-neutral-500 m-0">
+      What each student pays the university, by department, level and option.
+      Payments settle to the university’s account; Acheva takes nothing from them.
+    </p>
+  </div>
+</div>
+
+<div class="sf-bar">
+  <div class="adm-field adm-field--inline">
+    <label class="adm-field__label" for="sf-school">School</label>
+    <mat-form-field appearance="outline" class="adm-mat adm-mat--inline">
+      <mat-select id="sf-school" [value]="schoolId()" (selectionChange)="chooseSchool($event.value)">
+        @for (school of schools(); track school._id) {
+          <mat-option [value]="school._id">{{ school.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+  @if (view(); as current) {
+    <div class="adm-field adm-field--inline">
+      <label class="adm-field__label" for="sf-session">Session</label>
+      <mat-form-field appearance="outline" class="adm-mat adm-mat--inline sf-bar__session">
+        <mat-select id="sf-session" [value]="current.session" (selectionChange)="chooseSession($event.value)">
+          @for (session of current.sessions; track session) {
+            <mat-option [value]="session">
+              {{ session }}{{ session === current.activeSession ? ' · active' : '' }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <span
+      class="adm-chip sf-bar__status"
+      [class.adm-chip--brand]="status().tone === 'brand'"
+      [class.adm-chip--tint]="status().tone === 'tint'"
+      [class.adm-chip--muted]="status().tone === 'muted'"
+    >
+      {{ status().label }}
+    </span>
+  }
+</div>
+
+@if (loading()) {
+  <div class="sf-grid">
+    <app-skeleton height="10rem" />
+    <app-skeleton height="10rem" />
+  </div>
+  <app-skeleton height="18rem" />
+} @else if (view(); as current) {
+  <div class="sf-grid">
+    <!-- ── Where the money goes ─────────────────────────────────────────── -->
+    <section class="adm-card sf-card">
+      <header class="sf-card__head">
+        <h3 class="acva-para-2 fw-500 m-0">Payout account</h3>
+        <button type="button" class="adm-link-btn" (click)="editAccount()">
+          {{ current.account ? 'Change' : 'Add account' }}
+        </button>
+      </header>
+      @if (current.account; as account) {
+        <dl class="adm-dl">
+          <dt>Account name</dt>
+          <dd>{{ account.accountName }}</dd>
+          <dt>Bank</dt>
+          <dd>{{ account.bankName ?? account.bankCode }}</dd>
+          <dt>Account number</dt>
+          <dd>{{ account.accountNumber }}</dd>
+        </dl>
+        <span
+          class="adm-chip sf-card__chip"
+          [class.adm-chip--tint]="account.verified"
+          [class.adm-chip--muted]="!account.verified"
+        >
+          {{ account.verified ? 'Confirmed by Paystack' : 'Not confirmed — students cannot pay' }}
+        </span>
+      } @else {
+        <p class="acva-para-1 text-neutral-500 m-0">
+          No account yet. Add the university’s bursary account before publishing —
+          every school-fee payment settles there.
+        </p>
+      }
+    </section>
+
+    <!-- ── When payments are due ────────────────────────────────────────── -->
+    <section class="adm-card sf-card">
+      <header class="sf-card__head">
+        <h3 class="acva-para-2 fw-500 m-0">Payments</h3>
+      </header>
+      <div class="adm-tabs" role="group" aria-label="How many payments">
+        @for (count of [1, 2, 3]; track count) {
+          <button
+            type="button"
+            class="adm-tab"
+            [class.adm-tab--on]="dueDates().length === count"
+            [disabled]="countLocked() && dueDates().length !== count"
+            (click)="setCount(count)"
+          >
+            {{ count === 1 ? 'In full' : count + ' payments' }}
+          </button>
+        }
+      </div>
+      <div class="sf-dates">
+        @for (date of dueDates(); track $index) {
+          <label class="adm-field">
+            <span class="adm-field__label">
+              {{ dueDates().length === 1 ? 'Due by' : 'Payment ' + ($index + 1) + ' due by' }}
+            </span>
+            <input
+              class="adm-input"
+              type="date"
+              [value]="date"
+              (input)="setDueDate($index, $any($event.target).value)"
+            />
+          </label>
+        }
+      </div>
+      <p class="acva-caption text-neutral-500 m-0">
+        Students choose each amount: at least 30% of their fee, and the last
+        payment clears it. One payment opens first-semester registration;
+        second semester needs the fee in full.
+        @if (countLocked()) {
+          Students have started paying, so the number of payments is fixed —
+          the dates can still move.
+        }
+      </p>
+    </section>
+  </div>
+
+  <!-- ── The fees ────────────────────────────────────────────────────────── -->
+  <section class="adm-card">
+    <header class="sf-card__head sf-card__head--fees">
+      <div>
+        <h3 class="acva-para-2 fw-500 m-0">Fees</h3>
+        <p class="acva-caption text-neutral-500 m-0">
+          {{ feeCount() }} set across {{ current.departments.length }} departments.
+          An extra-year student pays their department’s final-level fee. An option
+          left blank pays the department fee.
+        </p>
+      </div>
+      <input
+        class="adm-input sf-search"
+        type="search"
+        placeholder="Find a department or faculty"
+        aria-label="Find a department or faculty"
+        [value]="search()"
+        (input)="search.set($any($event.target).value)"
+      />
+    </header>
+
+    @if (departments().length === 0) {
+      <p class="adm-empty">No departments match.</p>
+    }
+    @for (department of departments(); track department._id) {
+      <details class="sf-dept">
+        <summary class="sf-dept__summary">
+          <span class="fw-500">{{ department.name }}</span>
+          <span class="acva-caption text-neutral-500">{{ department.faculty }}</span>
+          <span
+            class="adm-chip sf-dept__count"
+            [class.adm-chip--tint]="setLevels(department) === department.levels.length"
+            [class.adm-chip--muted]="setLevels(department) < department.levels.length"
+          >
+            {{ setLevels(department) }} of {{ department.levels.length }} levels
+          </span>
+        </summary>
+
+        <div class="sf-dept__body">
+          <table class="adm-table sf-table">
+            <thead>
+              <tr>
+                <th>Level</th>
+                <th>Department fee</th>
+                @for (option of department.options; track option._id) {
+                  <th>{{ option.name }}{{ option.isActive ? '' : ' (off)' }}</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (level of department.levels; track level) {
+                <tr>
+                  <td class="fw-500">{{ level }} Level</td>
+                  <td>
+                    <div class="sf-money" [class.sf-money--locked]="isLocked(department._id, level, null)">
+                      <span>₦</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        [attr.aria-label]="department.name + ' ' + level + ' Level fee'"
+                        [value]="amountFor(department._id, level, null)"
+                        [readOnly]="isLocked(department._id, level, null)"
+                        (input)="setAmount(department._id, level, null, $any($event.target).value)"
+                      />
+                    </div>
+                  </td>
+                  @for (option of department.options; track option._id) {
+                    <td>
+                      <div class="sf-money" [class.sf-money--locked]="isLocked(department._id, level, option._id)">
+                        <span>₦</span>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="Department fee"
+                          [attr.aria-label]="department.name + ' ' + level + ' Level ' + option.name + ' fee'"
+                          [value]="amountFor(department._id, level, option._id)"
+                          [readOnly]="isLocked(department._id, level, option._id)"
+                          (input)="setAmount(department._id, level, option._id, $any($event.target).value)"
+                        />
+                      </div>
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+          <div class="sf-dept__foot">
+            <button type="button" class="adm-link-btn" (click)="fillLevels(department)">
+              Use the {{ department.levels[0] }} Level fee for every blank level
+            </button>
+            @if (department.options.length === 0) {
+              <span class="acva-caption text-neutral-500">
+                No options — add them under Department if this department charges by option.
+              </span>
+            }
+          </div>
+        </div>
+      </details>
+    }
+  </section>
+
+  <footer class="sf-foot">
+    <button type="button" class="adm-btn" [disabled]="saving() || !dirty()" (click)="save()">
+      {{ saving() ? 'Saving…' : 'Save plan' }}
+    </button>
+    @if (current.plan?.status === 'PUBLISHED') {
+      <button
+        type="button"
+        class="adm-btn adm-btn--outline"
+        [disabled]="saving() || countLocked()"
+        (click)="unpublish()"
+      >
+        Withdraw
+      </button>
+      <span class="acva-caption text-neutral-500">
+        Students can pay {{ current.session }} school fees
+        @if (countLocked()) {
+          — and have started to, so the plan stays published.
+        }
+      </span>
+    } @else {
+      <button
+        type="button"
+        class="adm-btn adm-btn--outline"
+        [disabled]="saving() || !!publishBlocker()"
+        (click)="publish()"
+      >
+        Publish
+      </button>
+      <span class="acva-caption text-neutral-500">
+        {{ publishBlocker() ?? 'Publishing opens payment, and course registration starts waiting on it.' }}
+      </span>
+    }
+  </footer>
+
+  <!-- Fees paid at the bank or on Remita: counted on upload, checked here. -->
+  <app-receipts-review [schoolId]="schoolId()" [session]="current.session" />
+} @else {
+  <section class="adm-card">
+    <p class="adm-empty">Choose a school to set its fees.</p>
+  </section>
+}

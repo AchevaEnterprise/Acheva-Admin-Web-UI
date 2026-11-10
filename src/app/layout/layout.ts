@@ -148,6 +148,12 @@ export class Layout {
       inactiveIcon: 'icons/menu/result-management-inactive.svg',
     },
     {
+      label: 'School Fees',
+      route: '/school-fees',
+      activeIcon: 'icons/menu/payment-history-active.svg',
+      inactiveIcon: 'icons/menu/payment-history-inactive.svg',
+    },
+    {
       label: 'Fees',
       route: '/fees',
       activeIcon: 'icons/menu/dues-management-active.svg',

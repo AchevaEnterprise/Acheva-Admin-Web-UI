@@ -1,0 +1,122 @@
+<div class="adm-page-head">
+  <div>
+    <h2 class="acva-heading-5 fw-500 m-0">Students</h2>
+    <p class="acva-para-1 text-neutral-500 m-0">
+      Every student on Acheva. Narrow by where they study and the level they are in.
+    </p>
+  </div>
+</div>
+
+<section class="adm-card">
+  <div class="adm-filters">
+    <app-placement-filter (changed)="onPlacement($event)" />
+    <div class="adm-field">
+      <label class="adm-field__label" for="stu-level">Level</label>
+      <select id="stu-level" class="adm-select" (change)="onLevel($event)">
+        <option value="">All levels</option>
+        @for (level of levels; track level) {
+          <option [value]="level">{{ level }} level</option>
+        }
+        <option value="600">600 level</option>
+      </select>
+    </div>
+    <div class="adm-field">
+      <label class="adm-field__label" for="stu-details">Personal details</label>
+      <select id="stu-details" class="adm-select" (change)="onDetails($event)">
+        <option value="">Any</option>
+        <option value="COMPLETE">Complete</option>
+        <option value="MISSING">Still missing</option>
+      </select>
+    </div>
+    <div class="adm-field">
+      <label class="adm-field__label" for="stu-status">Status</label>
+      <select id="stu-status" class="adm-select" (change)="onStatus($event)">
+        <option value="">Everyone</option>
+        <option value="ACTIVE">Active</option>
+        <option value="DEACTIVATED">Deactivated</option>
+      </select>
+    </div>
+    <div class="adm-field adm-field--search">
+      <label class="adm-field__label" for="stu-search">Search</label>
+      <input
+        id="stu-search"
+        class="adm-input"
+        type="search"
+        placeholder="Name, registration number or email"
+        autocomplete="off"
+        (input)="onSearch($event)"
+      />
+    </div>
+  </div>
+
+  <p class="adm-meta-line m-0">
+    <span>{{ total() }} {{ total() === 1 ? 'student' : 'students' }}</span>
+    <span>By registration number</span>
+  </p>
+
+  @if (loading()) {
+    <app-skeleton-table [cols]="6" [rows]="8" />
+  } @else if (rows().length === 0) {
+    <p class="adm-empty">No students match these filters.</p>
+  } @else {
+    <div style="overflow-x: auto">
+      <table class="adm-table adm-table--rows">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Reg. No.</th>
+            <th>Department</th>
+            <th>Level</th>
+            <th>Details</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (student of rows(); track student._id) {
+            <tr tabindex="0" (click)="open(student)" (keydown.enter)="open(student)">
+              <td>
+                <span class="fw-500">{{ student.fullName | titlecase }}</span>
+                @if (student.email) {
+                  <span class="adm-cell-sub">{{ student.email }}</span>
+                }
+              </td>
+              <td>{{ student.registrationNumber }}</td>
+              <td>
+                {{ student.department?.name ?? '—' }}
+                @if (student.school) {
+                  <span class="adm-cell-sub">{{ student.school.acronym || student.school.name }}</span>
+                }
+              </td>
+              <td>{{ standing(student) }}</td>
+              <td>
+                @if (student.missingDetails.length === 0) {
+                  <span class="adm-chip adm-chip--tint">Complete</span>
+                } @else {
+                  <span class="adm-chip adm-chip--outline">
+                    {{ student.missingDetails.length }} missing
+                  </span>
+                }
+              </td>
+              <td>
+                <span
+                  class="adm-chip"
+                  [class.adm-chip--tint]="student.isActive !== false"
+                  [class.adm-chip--muted]="student.isActive === false"
+                >
+                  {{ student.isActive === false ? 'Deactivated' : 'Active' }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <app-pager
+    [page]="query().page"
+    [limit]="query().limit"
+    [total]="total()"
+    (pageChange)="goTo($event)"
+  />
+</section>

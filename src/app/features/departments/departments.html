@@ -47,13 +47,28 @@
   } @else {
     <table class="adm-table">
       <thead>
-        <tr><th>Name</th><th>Code</th><th>Status</th><th>Action</th></tr>
+        <tr><th>Name</th><th>Code</th><th>Options</th><th>Status</th><th>Action</th></tr>
       </thead>
       <tbody>
         @for (department of departments(); track department._id) {
           <tr>
             <td class="fw-600">{{ department.name }}</td>
             <td>{{ department.code || '—' }}</td>
+            <td>
+              <div class="adm-chip-row">
+                @for (name of activeOptions().get(department._id) ?? []; track name) {
+                  <span class="adm-chip adm-chip--tint">{{ name }}</span>
+                }
+                <button
+                  type="button"
+                  class="adm-link-btn"
+                  [attr.aria-label]="'Options for ' + department.name"
+                  (click)="manageOptions(department)"
+                >
+                  {{ (activeOptions().get(department._id) ?? []).length ? 'Manage' : 'Add options' }}
+                </button>
+              </div>
+            </td>
             <td>
               <span
                 class="adm-chip"

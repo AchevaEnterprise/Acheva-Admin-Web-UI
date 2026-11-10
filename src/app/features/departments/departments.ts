@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   OnInit,
   signal,
@@ -19,7 +20,13 @@ import {
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { finalize } from 'rxjs';
-import { IDepartment, IFaculty, ISchool } from '../../core/models/admin.model';
+import {
+  IDepartment,
+  IDepartmentOption,
+  IFaculty,
+  ISchool,
+} from '../../core/models/admin.model';
+import { WIDE_DIALOG } from '../../core/dialog';
 import { AdminApiService } from '../../core/services/admin-api.service';
 import { ToastService } from '../../core/services/toast.service';
 import { SkeletonTable } from '../../shared/skeleton';
@@ -79,6 +86,152 @@ export class DepartmentDialog {
     if (this.form.invalid) return;
     const { name, code } = this.form.getRawValue();
     this.ref.close({ name: name.trim(), code: code.trim().toUpperCase() });
+  }
+}
+
+// ─── Options dialog ───────────────────────────────────────────────────────────
+
+/**
+ * The options within a department's programme (2026-11-09). Students choose
+ * theirs from this list and school fees can differ by option, so an option
+ * is renamed or switched off — never deleted — and a rename reaches every
+ * student who chose it.
+ */
+@Component({
+  selector: 'app-department-options',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ReactiveFormsModule],
+  template: `
+    <div class="adm-dialog">
+      <h2>Options · {{ department.name }}</h2>
+      <p>
+        Specialisations within the programme. Students choose theirs from this
+        list, and school fees can differ by option. Switching one off stops new
+        choices; students already in it keep it.
+      </p>
+
+      @if (options().length === 0) {
+        <p class="adm-empty">
+          No options yet — students in this department are not asked to choose one.
+        </p>
+      } @else {
+        <ul class="opt-list">
+          @for (option of options(); track option._id) {
+            <li class="opt-list__row" [class.opt-list__row--off]="option.isActive === false">
+              <input
+                class="adm-input"
+                [attr.aria-label]="'Name of ' + option.name"
+                [value]="draftFor(option)"
+                (input)="setDraft(option, $any($event.target).value)"
+              />
+              <button
+                type="button"
+                class="adm-btn adm-btn--outline"
+                [disabled]="busy() || !renamed(option)"
+                (click)="rename(option)"
+              >
+                Rename
+              </button>
+              <button
+                type="button"
+                class="adm-toggle"
+                [class.adm-toggle--on]="option.isActive !== false"
+                [attr.aria-label]="option.isActive === false ? 'Switch ' + option.name + ' on' : 'Switch ' + option.name + ' off'"
+                [disabled]="busy()"
+                (click)="toggle(option)"
+              ></button>
+            </li>
+          }
+        </ul>
+      }
+
+      <form class="opt-add" [formGroup]="form" (ngSubmit)="add()">
+        <label class="adm-field opt-add__field">
+          <span class="adm-field__label">New option</span>
+          <input class="adm-input" formControlName="name" placeholder="e.g Statistics" />
+        </label>
+        <button type="submit" class="adm-btn" [disabled]="busy() || form.invalid">Add option</button>
+      </form>
+
+      <div class="adm-dialog__actions">
+        <button type="button" class="adm-btn adm-btn--outline" (click)="ref.close(changed)">Done</button>
+      </div>
+    </div>
+  `,
+})
+export class DepartmentOptionsDialog {
+  readonly ref = inject(MatDialogRef<DepartmentOptionsDialog, boolean>);
+  readonly department = inject<IDepartment>(MAT_DIALOG_DATA);
+  private readonly api = inject(AdminApiService);
+  private readonly toast = inject(ToastService);
+
+  readonly options = signal<readonly IDepartmentOption[]>(this.department.options ?? []);
+  readonly busy = signal(false);
+  private readonly drafts = signal<Record<string, string>>({});
+  /** Tells the page to reload when the dialog closes. */
+  changed = false;
+
+  readonly form = new FormGroup({
+    name: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.maxLength(80)],
+    }),
+  });
+
+  draftFor(option: IDepartmentOption): string {
+    return this.drafts()[option._id] ?? option.name;
+  }
+
+  setDraft(option: IDepartmentOption, value: string): void {
+    this.drafts.update((drafts) => ({ ...drafts, [option._id]: value }));
+  }
+
+  renamed(option: IDepartmentOption): boolean {
+    const draft = this.drafts()[option._id]?.trim();
+    return !!draft && draft !== option.name;
+  }
+
+  add(): void {
+    const name = this.form.getRawValue().name.trim();
+    if (!name) return;
+    this.run(this.api.addDepartmentOption(this.department._id, name), `Added ${name}.`, () =>
+      this.form.reset(),
+    );
+  }
+
+  rename(option: IDepartmentOption): void {
+    const name = this.draftFor(option).trim();
+    this.run(
+      this.api.updateDepartmentOption(this.department._id, option._id, { name }),
+      `Renamed to ${name}. Students who chose it now show the new name.`,
+    );
+  }
+
+  toggle(option: IDepartmentOption): void {
+    const isActive = option.isActive === false;
+    this.run(
+      this.api.updateDepartmentOption(this.department._id, option._id, { isActive }),
+      isActive ? `${option.name} can be chosen again.` : `${option.name} switched off for new choices.`,
+    );
+  }
+
+  private run(
+    request: ReturnType<AdminApiService['addDepartmentOption']>,
+    done: string,
+    after?: () => void,
+  ): void {
+    this.busy.set(true);
+    request.pipe(finalize(() => this.busy.set(false))).subscribe({
+      next: (resp) => {
+        this.options.set(resp.data?.options ?? []);
+        this.drafts.set({});
+        this.changed = true;
+        this.toast.success(done);
+        after?.();
+      },
+      error: (err) => this.toast.error(err?.error?.message ?? 'Could not save the option.'),
+    });
   }
 }
 
@@ -186,6 +339,27 @@ export class Departments implements OnInit {
           error: (err) =>
             this.toast.error(err?.error?.message ?? 'Could not update department.'),
         });
+      });
+  }
+
+  /** Active option names, for the table. */
+  readonly activeOptions = computed(() => {
+    const names = new Map<string, string[]>();
+    for (const department of this.departments()) {
+      names.set(
+        department._id,
+        (department.options ?? []).filter((option) => option.isActive !== false).map((option) => option.name),
+      );
+    }
+    return names;
+  });
+
+  manageOptions(department: IDepartment): void {
+    this.dialog
+      .open(DepartmentOptionsDialog, { ...WIDE_DIALOG, data: department })
+      .afterClosed()
+      .subscribe((changed: boolean | undefined) => {
+        if (changed) this.load();
       });
   }
 

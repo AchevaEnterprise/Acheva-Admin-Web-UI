@@ -1,0 +1,166 @@
+<div class="adm-page-head">
+  <div>
+    <h2 class="acva-heading-5 fw-500 m-0">Logs</h2>
+    <p class="acva-para-1 text-neutral-500 m-0">
+      Problems the Acheva team is tracking, each with a number, an owner and a record of how it
+      ended.
+    </p>
+  </div>
+  <button type="button" class="adm-btn" (click)="create()">＋ New ticket</button>
+</div>
+
+<section class="adm-card">
+  <div class="adm-tabs" role="tablist" aria-label="Ticket status">
+    @for (status of statuses; track status) {
+      <button
+        type="button"
+        role="tab"
+        class="adm-tab"
+        [class.adm-tab--on]="query().status === status"
+        [attr.aria-selected]="query().status === status"
+        (click)="setStatus(status)"
+      >
+        {{ statusLabels[status] }}
+        <span class="adm-tab__count">{{ summary()?.byStatus?.[status] ?? 0 }}</span>
+      </button>
+    }
+    <button
+      type="button"
+      role="tab"
+      class="adm-tab"
+      [class.adm-tab--on]="!query().status"
+      [attr.aria-selected]="!query().status"
+      (click)="setStatus(undefined)"
+    >
+      All
+      <span class="adm-tab__count">{{ allCount() }}</span>
+    </button>
+  </div>
+
+  <div class="adm-filters">
+    <div class="adm-field">
+      <label class="adm-field__label" for="log-assignee">Assigned to</label>
+      <select
+        id="log-assignee"
+        class="adm-select"
+        [value]="query().assignee ?? ''"
+        (change)="onAssignee($event)"
+      >
+        <option value="">Anyone</option>
+        <option value="me">Me ({{ summary()?.mine ?? 0 }} active)</option>
+        <option value="unassigned">Nobody ({{ summary()?.unassigned ?? 0 }} active)</option>
+        @for (admin of admins(); track admin._id) {
+          <option [value]="admin._id">{{ admin.firstname }} {{ admin.lastname }}</option>
+        }
+      </select>
+    </div>
+    <div class="adm-field">
+      <label class="adm-field__label" for="log-priority">Priority</label>
+      <select id="log-priority" class="adm-select" (change)="onPriority($event)">
+        <option value="">Any priority</option>
+        @for (priority of priorities; track priority) {
+          <option [value]="priority">{{ priorityLabels[priority] }}</option>
+        }
+      </select>
+    </div>
+    <div class="adm-field">
+      <label class="adm-field__label" for="log-category">Category</label>
+      <select id="log-category" class="adm-select" (change)="onCategory($event)">
+        <option value="">Any category</option>
+        @for (category of categories; track category) {
+          <option [value]="category">{{ categoryLabels[category] }}</option>
+        }
+      </select>
+    </div>
+    <div class="adm-field">
+      <label class="adm-field__label" for="log-school">School</label>
+      <select id="log-school" class="adm-select" (change)="onSchool($event)">
+        <option value="">Any school</option>
+        @for (school of schools(); track school._id) {
+          <option [value]="school._id">{{ school.name }}</option>
+        }
+      </select>
+    </div>
+    <div class="adm-field adm-field--search">
+      <label class="adm-field__label" for="log-search">Search</label>
+      <input
+        id="log-search"
+        class="adm-input"
+        type="search"
+        placeholder="TKT-0042, a title or who reported it"
+        autocomplete="off"
+        (input)="onSearch($event)"
+      />
+    </div>
+  </div>
+
+  <p class="adm-meta-line m-0">
+    <span>{{ total() }} {{ total() === 1 ? 'ticket' : 'tickets' }}</span>
+    <span>Most recently changed first</span>
+  </p>
+
+  @if (loading()) {
+    <app-skeleton-table [cols]="6" [rows]="6" />
+  } @else if (rows().length === 0) {
+    <p class="adm-empty">
+      @if (query().status === 'OPEN' && !query().search) {
+        Nothing open. Raise a ticket when a problem needs following up.
+      } @else {
+        No tickets match these filters.
+      }
+    </p>
+  } @else {
+    <div style="overflow-x: auto">
+      <table class="adm-table adm-table--rows">
+        <thead>
+          <tr>
+            <th>Ticket</th>
+            <th>Title</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Assigned to</th>
+            <th>Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (ticket of rows(); track ticket._id) {
+            <tr tabindex="0" (click)="open(ticket)" (keydown.enter)="open(ticket)">
+              <td class="fw-500" style="white-space: nowrap">{{ ticket.reference }}</td>
+              <td>
+                {{ ticket.title }}
+                <span class="adm-cell-sub">
+                  {{ categoryLabels[ticket.category] }}
+                  @if (ticket.school) {
+                    · {{ ticket.school.acronym || ticket.school.name }}
+                  }
+                  @if (ticket.reporterName) {
+                    · from {{ ticket.reporterName }}
+                  }
+                </span>
+              </td>
+              <td>
+                <span [class]="'adm-chip ' + priorityChip(ticket.priority)">
+                  {{ priorityLabels[ticket.priority] }}
+                </span>
+              </td>
+              <td>
+                <span [class]="'adm-chip ' + statusChip(ticket.status)">
+                  {{ statusLabels[ticket.status] }}
+                </span>
+              </td>
+              <td>{{ ticket.assignee ? personName(ticket.assignee) : 'Nobody' }}</td>
+              <td style="white-space: nowrap">{{ ticket.updatedAt | date: 'dd/MM/yyyy' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <app-pager
+    [page]="query().page"
+    [limit]="query().limit"
+    [total]="total()"
+    (pageChange)="goTo($event)"
+  />
+</section>
