@@ -67,7 +67,9 @@
     This is an announcement — replies are not enabled.
   </p>
 } @else {
-  <form class="composer" (ngSubmit)="submit()">
+  <!-- (submit), not (ngSubmit): no forms module is imported here, so
+       ngSubmit never fires and the browser would reload the page instead. -->
+  <form class="composer" (submit)="$event.preventDefault(); submit()">
     <textarea
       class="composer__input acva-para-1"
       rows="1"

@@ -30,12 +30,13 @@ import { ToastService } from '../../core/services/toast.service';
  * our console, which is neither our decision nor our liability — and the
  * labels say so, because "dues fee" read on its own is genuinely ambiguous.
  *
+ * Nor the transcript download fee: downloads became free on 2026-11-10.
+ *
  * ## The split is shown, not just configured
  *
- * Typing "15%" and trusting it is how a rounding error ships. Both fields
- * render a live worked example in naira — the same figures the server will
- * compute — so whoever sets the price sees what a department actually
- * receives before saving.
+ * The field renders a live worked example in naira — the same figures the
+ * server will compute — so whoever sets the price sees what a department
+ * actually receives before saving.
  */
 @Component({
   selector: 'app-fees',
@@ -52,43 +53,15 @@ export class Fees implements OnInit {
   readonly saving = signal(false);
   readonly current = signal<IPlatformSettings | null>(null);
 
-  /** Mirrors of the form, so the worked examples recompute as you type. */
-  readonly transcriptFee = signal(0);
-  readonly departmentPercent = signal(0);
+  /** A mirror of the form, so the worked example recomputes as you type. */
   readonly duesFee = signal(0);
 
   readonly form = new FormGroup({
-    transcriptFeeNaira: new FormControl(0, {
-      nonNullable: true,
-      validators: [Validators.required, Validators.min(0)],
-    }),
-    transcriptDepartmentSharePercent: new FormControl(15, {
-      nonNullable: true,
-      validators: [Validators.required, Validators.min(0), Validators.max(100)],
-    }),
     duesPlatformFeeNaira: new FormControl(0, {
       nonNullable: true,
       validators: [Validators.required, Validators.min(0)],
     }),
   });
-
-  // ── Worked examples, in kobo, matching the server's rounding exactly ─────
-
-  /**
-   * The department's share is FLOORED and Acheva takes the remainder — the
-   * same rule as `splitTranscriptFee` on the server. Rounding both halves
-   * independently is how a split ends up a kobo over what was collected.
-   */
-  readonly transcriptSplit = computed(() => {
-    const total = toKobo(this.transcriptFee());
-    const percent = Math.round(this.departmentPercent());
-    const department = Math.floor((total * percent) / 100);
-    return { total, department, platform: total - department };
-  });
-
-  readonly transcriptFeeIsZero = computed(
-    () => this.transcriptSplit().total === 0,
-  );
 
   /** A worked dues example at a representative ₦37,500 charge. */
   readonly duesExample = computed(() => {
@@ -109,10 +82,6 @@ export class Fees implements OnInit {
 
   ngOnInit(): void {
     this.form.valueChanges.subscribe((value) => {
-      this.transcriptFee.set(Number(value.transcriptFeeNaira) || 0);
-      this.departmentPercent.set(
-        Number(value.transcriptDepartmentSharePercent) || 0,
-      );
       this.duesFee.set(Number(value.duesPlatformFeeNaira) || 0);
     });
 
@@ -128,9 +97,6 @@ export class Fees implements OnInit {
           const settings = resp.data;
           this.current.set(settings);
           this.form.patchValue({
-            transcriptFeeNaira: toNaira(settings.transcriptFeeKobo),
-            transcriptDepartmentSharePercent:
-              settings.transcriptDepartmentSharePercent,
             duesPlatformFeeNaira: toNaira(settings.duesPlatformFeeKobo),
           });
         },
@@ -145,10 +111,6 @@ export class Fees implements OnInit {
     const raw = this.form.getRawValue();
     this.api
       .update({
-        transcriptFeeKobo: toKobo(raw.transcriptFeeNaira),
-        transcriptDepartmentSharePercent: Math.round(
-          raw.transcriptDepartmentSharePercent,
-        ),
         duesPlatformFeeKobo: toKobo(raw.duesPlatformFeeNaira),
       })
       .pipe(finalize(() => this.saving.set(false)))

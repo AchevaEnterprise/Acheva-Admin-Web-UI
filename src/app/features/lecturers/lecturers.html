@@ -1,0 +1,109 @@
+<div class="adm-page-head">
+  <div>
+    <h2 class="acva-heading-5 fw-500 m-0">Lecturers</h2>
+    <p class="acva-para-1 text-neutral-500 m-0">
+      Every member of staff on Acheva. Narrow by where they sit or the office they hold.
+    </p>
+  </div>
+</div>
+
+<section class="adm-card">
+  <div class="adm-filters">
+    <app-placement-filter (changed)="onPlacement($event)" />
+    <div class="adm-field">
+      <label class="adm-field__label" for="lec-role">Office</label>
+      <select id="lec-role" class="adm-select" (change)="onRole($event)">
+        <option value="">All offices</option>
+        @for (role of roleOptions; track role) {
+          <option [value]="role">{{ roleLabels[role] }}</option>
+        }
+      </select>
+    </div>
+    <div class="adm-field">
+      <label class="adm-field__label" for="lec-status">Status</label>
+      <select id="lec-status" class="adm-select" (change)="onStatus($event)">
+        <option value="">Everyone</option>
+        <option value="ACTIVE">Active</option>
+        <option value="DEACTIVATED">Deactivated</option>
+      </select>
+    </div>
+    <div class="adm-field adm-field--search">
+      <label class="adm-field__label" for="lec-search">Search</label>
+      <input
+        id="lec-search"
+        class="adm-input"
+        type="search"
+        placeholder="Name or email"
+        autocomplete="off"
+        (input)="onSearch($event)"
+      />
+    </div>
+  </div>
+
+  <p class="adm-meta-line m-0">
+    <span>{{ total() }} {{ total() === 1 ? 'lecturer' : 'lecturers' }}</span>
+    <span>Newest first</span>
+  </p>
+
+  @if (loading()) {
+    <app-skeleton-table [cols]="5" [rows]="8" />
+  } @else if (rows().length === 0) {
+    <p class="adm-empty">No lecturers match these filters.</p>
+  } @else {
+    <div style="overflow-x: auto">
+      <table class="adm-table adm-table--rows">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Department</th>
+            <th>Office</th>
+            <th>Status</th>
+            <th>Joined</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (lecturer of rows(); track lecturer._id) {
+            <tr tabindex="0" (click)="open(lecturer)" (keydown.enter)="open(lecturer)">
+              <td>
+                <span class="fw-500">{{ name(lecturer) }}</span>
+                <span class="adm-cell-sub">{{ lecturer.email }}</span>
+              </td>
+              <td>
+                {{ lecturer.department?.name ?? '—' }}
+                @if (lecturer.school) {
+                  <span class="adm-cell-sub">{{ lecturer.school.acronym || lecturer.school.name }}</span>
+                }
+              </td>
+              <td>
+                <span class="adm-chip-row">
+                  @for (role of offices(lecturer); track role) {
+                    <span class="adm-chip" [class.adm-chip--brand]="$first" [class.adm-chip--tint]="!$first">
+                      {{ roleLabels[role] }}
+                    </span>
+                  }
+                </span>
+              </td>
+              <td>
+                <span
+                  class="adm-chip"
+                  [class.adm-chip--tint]="lecturer.isActive !== false"
+                  [class.adm-chip--muted]="lecturer.isActive === false"
+                >
+                  {{ lecturer.isActive === false ? 'Deactivated' : 'Active' }}
+                </span>
+              </td>
+              <td>{{ lecturer.createdAt ? (lecturer.createdAt | date: 'dd/MM/yyyy') : '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <app-pager
+    [page]="query().page"
+    [limit]="query().limit"
+    [total]="total()"
+    (pageChange)="goTo($event)"
+  />
+</section>

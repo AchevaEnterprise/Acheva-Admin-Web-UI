@@ -6,16 +6,44 @@ import { IAPIResponse } from '../models/api-response.model';
 import {
   IAdminInvite,
   IAdminProfile,
+  IBank,
+  IReceiptPage,
+  ISaveSchoolFeePlan,
+  ISchoolFeeReceiptRow,
+  SchoolFeeReceiptStatus,
+  ISchoolFeeAccount,
+  ISchoolFeePlanView,
   ICreatedInvite,
   ICreateCoursePayload,
   ICurriculumImportReport,
   ICurriculumRow,
   IDepartment,
+  IDirectoryLecturer,
+  IDirectoryStudent,
   IFaculty,
+  ILecturerQuery,
   IOverview,
+  IPage,
   ISchool,
   ISchoolSettings,
+  IStudentQuery,
+  ITicket,
+  ITicketForm,
+  ITicketQuery,
+  ITicketRow,
+  ITicketSummary,
+  TicketStatus,
 } from '../models/admin.model';
+
+/** Query params from a filter object, leaving out anything unset. */
+function toParams(query: object): HttpParams {
+  let params = new HttpParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value === undefined || value === null || value === '') continue;
+    params = params.append(key, String(value));
+  }
+  return params;
+}
 
 /** One typed client for every admin-facing backend endpoint. */
 @Injectable({ providedIn: 'root' })
@@ -153,6 +181,94 @@ export class AdminApiService {
     );
   }
 
+  /** Options within a department's programme — set here, chosen by students. */
+  addDepartmentOption(departmentId: string, name: string): Observable<IAPIResponse<IDepartment>> {
+    return this.http.post<IAPIResponse<IDepartment>>(
+      `${this.base}/schools/faculties/departments/${departmentId}/options`,
+      { name },
+    );
+  }
+
+  updateDepartmentOption(
+    departmentId: string,
+    optionId: string,
+    body: Partial<{ name: string; isActive: boolean }>,
+  ): Observable<IAPIResponse<IDepartment>> {
+    return this.http.patch<IAPIResponse<IDepartment>>(
+      `${this.base}/schools/faculties/departments/${departmentId}/options/${optionId}`,
+      body,
+    );
+  }
+
+  // ── School fees ───────────────────────────────────────────────────────────
+
+  schoolFeePlan(schoolId: string, session?: string): Observable<IAPIResponse<ISchoolFeePlanView>> {
+    return this.http.get<IAPIResponse<ISchoolFeePlanView>>(`${this.base}/school-fees/admin/plan`, {
+      params: toParams({ schoolId, session }),
+    });
+  }
+
+  saveSchoolFeePlan(body: ISaveSchoolFeePlan): Observable<IAPIResponse<ISchoolFeePlanView>> {
+    return this.http.put<IAPIResponse<ISchoolFeePlanView>>(`${this.base}/school-fees/admin/plan`, body);
+  }
+
+  publishSchoolFeePlan(schoolId: string, session: string): Observable<IAPIResponse<ISchoolFeePlanView>> {
+    return this.http.post<IAPIResponse<ISchoolFeePlanView>>(
+      `${this.base}/school-fees/admin/plan/publish`,
+      { schoolId, session },
+    );
+  }
+
+  unpublishSchoolFeePlan(schoolId: string, session: string): Observable<IAPIResponse<ISchoolFeePlanView>> {
+    return this.http.post<IAPIResponse<ISchoolFeePlanView>>(
+      `${this.base}/school-fees/admin/plan/unpublish`,
+      { schoolId, session },
+    );
+  }
+
+  setSchoolFeeAccount(body: {
+    schoolId: string;
+    bankCode: string;
+    accountNumber: string;
+  }): Observable<IAPIResponse<ISchoolFeeAccount>> {
+    return this.http.put<IAPIResponse<ISchoolFeeAccount>>(`${this.base}/school-fees/admin/account`, body);
+  }
+
+  /** Receipts students uploaded for fees paid elsewhere — to check. */
+  schoolFeeReceipts(query: {
+    schoolId: string;
+    session?: string;
+    status?: SchoolFeeReceiptStatus | '';
+    page?: number;
+    limit?: number;
+  }): Observable<IAPIResponse<IReceiptPage>> {
+    return this.http.get<IAPIResponse<IReceiptPage>>(`${this.base}/school-fees/admin/receipts`, {
+      params: toParams(query),
+    });
+  }
+
+  decideSchoolFeeReceipt(
+    id: string,
+    body: { status: 'VERIFIED' | 'REJECTED'; reason?: string },
+  ): Observable<IAPIResponse<ISchoolFeeReceiptRow>> {
+    return this.http.patch<IAPIResponse<ISchoolFeeReceiptRow>>(
+      `${this.base}/school-fees/admin/receipts/${id}`,
+      body,
+    );
+  }
+
+  /** One file of a receipt, streamed by the API — the files are private. */
+  schoolFeeReceiptFile(id: string, which: 'schoolFeeReceipt' | 'remitaReceipt'): Observable<Blob> {
+    return this.http.get(`${this.base}/school-fees/receipts/${id}/files/${which}`, {
+      responseType: 'blob',
+    });
+  }
+
+  /** Banks Paystack can pay out to. */
+  banks(): Observable<IAPIResponse<IBank[]>> {
+    return this.http.get<IAPIResponse<IBank[]>>(`${this.base}/banks`);
+  }
+
   // ── Curriculum ────────────────────────────────────────────────────────────
 
   curriculum(
@@ -261,6 +377,77 @@ export class AdminApiService {
         transfersApplied?: number;
       }>
     >(`${this.base}/school-settings/rollover?schoolId=${schoolId}`, body);
+  }
+
+  // ── Directory ─────────────────────────────────────────────────────────────
+
+  lecturers(query: ILecturerQuery): Observable<IAPIResponse<IPage<IDirectoryLecturer>>> {
+    return this.http.get<IAPIResponse<IPage<IDirectoryLecturer>>>(`${this.base}/admins/lecturers`, {
+      params: toParams(query),
+    });
+  }
+
+  students(query: IStudentQuery): Observable<IAPIResponse<IPage<IDirectoryStudent>>> {
+    return this.http.get<IAPIResponse<IPage<IDirectoryStudent>>>(`${this.base}/admins/students`, {
+      params: toParams(query),
+    });
+  }
+
+  /** Deactivation ends the lecturer's sessions on their next request. */
+  setLecturerActive(id: string, isActive: boolean): Observable<IAPIResponse<unknown>> {
+    return this.http.patch<IAPIResponse<unknown>>(
+      `${this.base}/lecturers/toggle-active-status/${id}`,
+      { isActive },
+    );
+  }
+
+  /** Rewrites the student and every result entry that carries the number, atomically. */
+  changeRegNo(
+    studentId: string,
+    newRegNo: string,
+  ): Observable<IAPIResponse<{ oldRegNo: string; newRegNo: string; entriesUpdated: number }>> {
+    return this.http.patch<
+      IAPIResponse<{ oldRegNo: string; newRegNo: string; entriesUpdated: number }>
+    >(`${this.base}/admins/students/${studentId}/regno`, { newRegNo });
+  }
+
+  // ── Tickets (Logs) ────────────────────────────────────────────────────────
+
+  tickets(query: ITicketQuery): Observable<IAPIResponse<IPage<ITicketRow>>> {
+    return this.http.get<IAPIResponse<IPage<ITicketRow>>>(`${this.base}/tickets`, {
+      params: toParams(query),
+    });
+  }
+
+  ticketSummary(): Observable<IAPIResponse<ITicketSummary>> {
+    return this.http.get<IAPIResponse<ITicketSummary>>(`${this.base}/tickets/summary`);
+  }
+
+  ticket(id: string): Observable<IAPIResponse<ITicket>> {
+    return this.http.get<IAPIResponse<ITicket>>(`${this.base}/tickets/${id}`);
+  }
+
+  createTicket(body: ITicketForm): Observable<IAPIResponse<ITicket>> {
+    return this.http.post<IAPIResponse<ITicket>>(`${this.base}/tickets`, body);
+  }
+
+  updateTicket(id: string, body: Partial<ITicketForm>): Observable<IAPIResponse<ITicket>> {
+    return this.http.patch<IAPIResponse<ITicket>>(`${this.base}/tickets/${id}`, body);
+  }
+
+  changeTicketStatus(
+    id: string,
+    status: TicketStatus,
+    note?: string,
+  ): Observable<IAPIResponse<ITicket>> {
+    return this.http.post<IAPIResponse<ITicket>>(`${this.base}/tickets/${id}/status`, {
+      status,
+      note,
+    });
+  }
+
+  addTicketNote(id: string, note: string): Observable<IAPIResponse<ITicket>> {
+    return this.http.post<IAPIResponse<ITicket>>(`${this.base}/tickets/${id}/notes`, { note });
   }
 
   // ── School settings (active session) ──────────────────────────────────────

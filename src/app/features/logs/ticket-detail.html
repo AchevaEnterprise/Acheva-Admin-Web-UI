@@ -1,0 +1,163 @@
+<p class="m-0 mb-3 acva-para-1">
+  <a routerLink="/logs" class="text-neutral-500">← All tickets</a>
+</p>
+
+@if (loading() && !ticket()) {
+  <section class="adm-card">
+    <app-skeleton width="30%" height="1.25rem" />
+    <app-skeleton width="70%" height="1rem" class="mt-3" />
+    <app-skeleton width="100%" height="6rem" class="mt-4" />
+  </section>
+} @else if (ticket(); as t) {
+  <div class="adm-page-head">
+    <div>
+      <p class="acva-para-1 text-neutral-500 m-0">{{ t.reference }}</p>
+      <h2 class="acva-heading-5 fw-500 m-0">{{ t.title }}</h2>
+    </div>
+    <button type="button" class="adm-btn adm-btn--outline" (click)="edit()">Edit</button>
+  </div>
+
+  <div class="ticket-layout">
+    <div>
+      <section class="adm-card">
+        @if (t.description) {
+          <p class="ticket-description">{{ t.description }}</p>
+        } @else {
+          <p class="ticket-description text-neutral-500">No description.</p>
+        }
+
+        @if (t.resolution && (t.status === 'RESOLVED' || t.status === 'CLOSED')) {
+          <div class="ticket-resolution mt-4">
+            <span class="fw-500">{{ t.status === 'RESOLVED' ? 'Resolution' : 'Closed because' }}</span>
+            <p class="m-0 mt-1" style="white-space: pre-wrap">{{ t.resolution }}</p>
+          </div>
+        }
+
+        <h3 class="adm-section-title">Move it on</h3>
+        <div class="ticket-moves">
+          @for (move of moves(); track move.to) {
+            <button
+              type="button"
+              class="adm-btn"
+              [class.adm-btn--outline]="move.to === 'OPEN' || move.to === 'CLOSED'"
+              [disabled]="busy()"
+              (click)="choose(move)"
+            >
+              {{ move.label }}
+            </button>
+          }
+        </div>
+
+        @if (pendingMove(); as move) {
+          <div class="adm-field mt-3">
+            <label class="adm-field__label" for="move-note">{{ notePrompt(move) }}</label>
+            <textarea
+              id="move-note"
+              class="adm-input adm-textarea"
+              maxlength="2000"
+              [formControl]="moveNote"
+            ></textarea>
+          </div>
+          <div class="ticket-moves ticket-confirm">
+            <button type="button" class="adm-btn adm-btn--outline" (click)="pendingMove.set(null)">
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="adm-btn"
+              [disabled]="!moveNote.value.trim() || busy()"
+              (click)="confirmMove()"
+            >
+              {{ move.label }}
+            </button>
+          </div>
+        }
+      </section>
+
+      <section class="adm-card mt-4">
+        <h3 class="adm-section-title mt-0">Activity</h3>
+        <ol class="ticket-trail">
+          @for (event of trail(); track event._id) {
+            <li>
+              <time [attr.datetime]="event.at">{{ event.at | date: 'dd/MM/yyyy, HH:mm' }}</time>
+              {{ describe(event) }}
+              @if (event.note) {
+                <p class="ticket-quote">{{ event.note }}</p>
+              }
+            </li>
+          }
+        </ol>
+
+        <div class="adm-field mt-2" style="margin-bottom: 0">
+          <label class="adm-field__label" for="ticket-note">Add a note</label>
+          <textarea
+            id="ticket-note"
+            class="adm-input adm-textarea"
+            maxlength="2000"
+            placeholder="What you found, who you spoke to, what is next."
+            [formControl]="note"
+          ></textarea>
+        </div>
+        <div class="ticket-moves mt-3">
+          <button
+            type="button"
+            class="adm-btn"
+            [disabled]="note.invalid || busy()"
+            (click)="addNote()"
+          >
+            Add note
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <aside class="adm-card">
+      <dl class="adm-dl">
+        <dt>Status</dt>
+        <dd><span [class]="'adm-chip ' + statusChip(t.status)">{{ statusLabels[t.status] }}</span></dd>
+        <dt>Priority</dt>
+        <dd>
+          <span [class]="'adm-chip ' + priorityChip(t.priority)">{{ priorityLabels[t.priority] }}</span>
+        </dd>
+        <dt>Category</dt>
+        <dd>{{ categoryLabels[t.category] }}</dd>
+        <dt>School</dt>
+        <dd>{{ t.school?.name ?? 'Platform-wide' }}</dd>
+        <dt>Reported by</dt>
+        <dd>
+          {{ t.reporterName || '—' }}
+          @if (t.reporterEmail) {
+            <span class="adm-cell-sub">{{ t.reporterEmail }}</span>
+          }
+        </dd>
+        <dt>Raised by</dt>
+        <dd>
+          {{ personName(t.createdBy) }}
+          <span class="adm-cell-sub">{{ t.createdAt | date: 'dd/MM/yyyy, HH:mm' }}</span>
+        </dd>
+      </dl>
+
+      <div class="adm-field mt-4" style="margin-bottom: 0">
+        <label class="adm-field__label" for="ticket-assignee">Assigned to</label>
+        <select
+          id="ticket-assignee"
+          class="adm-select"
+          [value]="t.assignee?._id ?? ''"
+          [disabled]="busy()"
+          (change)="assign($event)"
+        >
+          <option value="">Nobody</option>
+          @for (admin of admins(); track admin._id) {
+            <option [value]="admin._id" [selected]="admin._id === t.assignee?._id">
+              {{ admin.firstname }} {{ admin.lastname }}
+            </option>
+          }
+        </select>
+      </div>
+    </aside>
+  </div>
+} @else {
+  <section class="adm-card">
+    <p class="adm-empty">This ticket could not be found.</p>
+  </section>
+}

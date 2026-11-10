@@ -633,3 +633,328 @@ body {
   gap: 16px;
   flex-wrap: wrap;
 }
+
+// ── Directory & Logs pages (2026-11) ────────────────────────────────────────
+// Brand blue and its #77BBFF tint only — no new hue to tell two things apart —
+// and nothing heavier than 500.
+
+.adm-chip--brand { background: #2793ff; color: #fff; font-weight: 500; }
+.adm-chip--tint { background: rgb(119 187 255 / 18%); color: #2793ff; font-weight: 500; }
+.adm-chip--outline { background: #fff; color: #2793ff; border: 1px solid #77bbff; font-weight: 500; }
+.adm-chip--muted { background: #f3f4f6; color: #6b7280; font-weight: 500; }
+
+.adm-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 16px;
+  margin-bottom: 16px;
+
+  .adm-field {
+    margin-bottom: 0;
+    min-width: 170px;
+    flex: 1 1 170px;
+    max-width: 260px;
+  }
+
+  .adm-field--search {
+    flex: 2 1 240px;
+    max-width: none;
+  }
+}
+
+.adm-meta-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.adm-table--rows tbody tr {
+  cursor: pointer;
+  &:hover td { background: #f8fbff; }
+  &:focus-visible { outline: 2px solid #77bbff; outline-offset: -2px; }
+}
+
+.adm-cell-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.adm-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.adm-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 16px;
+  font-size: 0.8125rem;
+  color: #6b7280;
+
+  &__buttons { display: flex; gap: 8px; }
+}
+
+.adm-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.adm-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #374151;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover { border-color: #77bbff; }
+
+  &__count {
+    min-width: 20px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: #f3f4f6;
+    color: #6b7280;
+    font-size: 0.6875rem;
+    text-align: center;
+  }
+
+  &--on {
+    background: #2793ff;
+    border-color: #2793ff;
+    color: #fff;
+
+    .adm-tab__count { background: rgb(255 255 255 / 22%); color: #fff; }
+  }
+}
+
+// Label / value pairs in a detail view.
+.adm-dl {
+  display: grid;
+  grid-template-columns: minmax(120px, 34%) 1fr;
+  gap: 10px 16px;
+  margin: 0;
+  font-size: 0.8125rem;
+
+  dt { color: #6b7280; }
+  dd { margin: 0; color: #1f2937; overflow-wrap: anywhere; }
+}
+
+.adm-section-title {
+  margin: 20px 0 10px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.adm-textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+// Opened with `WIDE_DIALOG` (core/dialog.ts): Material caps a dialog at
+// 560px, so the width is set on the dialog itself rather than forced here.
+.adm-dialog--wide {
+  // The new detail and ticket dialogs follow the light-weight rule; the
+  // older dialogs keep their 700 heading until they are next touched.
+  h2 { font-weight: 500; }
+}
+
+.adm-section-title:first-child { margin-top: 0; }
+
+// ── Department options & school fees (2026-11-09) ───────────────────────────
+// Brand blue and its #77BBFF tint only; nothing heavier than 500.
+
+.adm-link-btn {
+  background: none;
+  border: none;
+  padding: 4px 6px;
+  color: #2793ff;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover:not(:disabled) { text-decoration: underline; }
+  &:disabled { opacity: 0.5; cursor: default; }
+}
+
+.opt-list {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__row--off .adm-input { color: #9ca3af; }
+}
+
+.opt-add {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  &__field { flex: 1 1 240px; margin-bottom: 0; }
+}
+
+.sf-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 16px;
+  margin-bottom: 16px;
+
+  .adm-field { margin-bottom: 0; }
+  &__session { width: 200px; }
+  &__status { margin-bottom: 12px; }
+}
+
+.sf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.sf-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  &__head--fees {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  &__chip { align-self: flex-start; }
+}
+
+.sf-dates {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0 12px;
+
+  .adm-field { margin-bottom: 8px; }
+}
+
+.sf-search { width: 280px; max-width: 100%; }
+
+.sf-dept {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  margin-bottom: 8px;
+
+  &[open] { border-color: #77bbff; }
+
+  &__summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    cursor: pointer;
+    list-style-position: inside;
+  }
+
+  &__count { margin-left: auto; }
+
+  &__body {
+    padding: 0 16px 12px;
+    overflow-x: auto;
+  }
+
+  &__foot {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-top: 8px;
+  }
+}
+
+.sf-table td { padding: 8px 12px; }
+
+.sf-money {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 150px;
+  padding: 0 12px;
+  border: 1px solid #d2d1d1;
+  border-radius: 8px;
+  background: #fff;
+
+  &:focus-within {
+    border-color: #2793ff;
+    box-shadow: 0 0 0 3px rgb(39 147 255 / 15%);
+  }
+
+  span { color: #6b7280; font-size: 0.875rem; }
+
+  input {
+    width: 100%;
+    min-height: 38px;
+    border: none;
+    outline: none;
+    font: inherit;
+    font-size: 0.875rem;
+    background: transparent;
+  }
+
+  &--locked {
+    background: rgb(119 187 255 / 12%);
+    border-color: #77bbff;
+  }
+}
+
+.sf-foot {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 -2px 8px rgb(0 0 0 / 6%);
+}

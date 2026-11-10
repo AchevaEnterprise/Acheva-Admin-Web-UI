@@ -56,6 +56,11 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'school-fees',
+        loadComponent: () =>
+          import('./features/school-fees/school-fees').then((m) => m.SchoolFees),
+      },
+      {
         path: 'fees',
         loadComponent: () => import('./features/fees/fees').then((m) => m.Fees),
       },
@@ -65,6 +70,25 @@ export const routes: Routes = [
         data: { fullBleed: true },
         loadComponent: () =>
           import('./features/support/support').then((m) => m.Support),
+      },
+      {
+        path: 'lecturers',
+        loadComponent: () =>
+          import('./features/lecturers/lecturers').then((m) => m.Lecturers),
+      },
+      {
+        path: 'students',
+        loadComponent: () =>
+          import('./features/students/students').then((m) => m.Students),
+      },
+      {
+        path: 'logs',
+        loadComponent: () => import('./features/logs/logs').then((m) => m.Logs),
+      },
+      {
+        path: 'logs/:id',
+        loadComponent: () =>
+          import('./features/logs/ticket-detail').then((m) => m.TicketDetail),
       },
       {
         path: 'settings',
