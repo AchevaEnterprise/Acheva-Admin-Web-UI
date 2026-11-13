@@ -16,6 +16,7 @@ import {
 import { filter } from 'rxjs';
 import { AuthService } from '../core/services/auth.service';
 import { MessagingService } from '../features/support/messaging.service';
+import { NotificationBell } from './notification-bell';
 
 interface INavItem {
   label: string;
@@ -32,7 +33,7 @@ interface INavItem {
   selector: 'app-layout',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NotificationBell],
   templateUrl: './layout.html',
   styleUrl: './layout.scss',
 })
@@ -105,17 +106,18 @@ export class Layout {
       activeIcon: 'icons/menu/history-active.svg',
       inactiveIcon: 'icons/menu/history-inactive.svg',
     },
-    {
-      label: 'Courses',
-      route: '/courses',
-      activeIcon: 'icons/menu/courses-active.svg',
-      inactiveIcon: 'icons/menu/courses-inactive.svg',
-    },
+    // School → Faculty → Department → Courses: the order they are set up in.
     {
       label: 'Department',
       route: '/department',
       activeIcon: 'icons/menu/payment-history-active.svg',
       inactiveIcon: 'icons/menu/payment-history-inactive.svg',
+    },
+    {
+      label: 'Courses',
+      route: '/courses',
+      activeIcon: 'icons/menu/courses-active.svg',
+      inactiveIcon: 'icons/menu/courses-inactive.svg',
     },
     {
       label: 'Lecturers',

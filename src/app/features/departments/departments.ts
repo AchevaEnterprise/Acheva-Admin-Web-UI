@@ -26,6 +26,7 @@ import {
   IFaculty,
   ISchool,
 } from '../../core/models/admin.model';
+import { LEVEL_COUNT_CHOICES, levelRangeLabel } from '../../core/department-levels';
 import { WIDE_DIALOG } from '../../core/dialog';
 import { AdminApiService } from '../../core/services/admin-api.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -37,6 +38,8 @@ export interface IDepartmentDialogResult {
   name: string;
   /** Short code printed on official documents (MTH). Required. */
   code: string;
+  /** How many levels the programme runs. Required. */
+  levelCount: number;
 }
 
 @Component({
@@ -48,13 +51,28 @@ export interface IDepartmentDialogResult {
     <form class="adm-dialog" [formGroup]="form" (ngSubmit)="save()">
       <h2>{{ department ? 'Edit Department' : 'Create Department' }}</h2>
       <p>Departments own courses and student cohorts</p>
+      <!-- Label text in its own span: the label is a flex column, so a bare
+           asterisk landed on a line of its own. -->
       <label>
-        Department Name
+        <span>Department Name <span class="adm-req">*</span></span>
         <input class="adm-input" formControlName="name" placeholder="e.g Mathematics" />
       </label>
       <label>
-        Code <span class="adm-req">*</span>
+        <span>Code <span class="adm-req">*</span></span>
         <input class="adm-input" formControlName="code" placeholder="e.g MTH" />
+      </label>
+      <label>
+        <span>Number of levels <span class="adm-req">*</span></span>
+        <select class="adm-select" formControlName="levelCount">
+          <option [ngValue]="null" disabled>Choose how many levels</option>
+          @for (count of levelChoices; track count) {
+            <option [ngValue]="count">{{ count }} {{ count === 1 ? 'level' : 'levels' }} · {{ rangeLabel(count) }}</option>
+          }
+        </select>
+        <span class="dep-hint">
+          The programme's length. Its last level is final year: students there graduate,
+          or go into extra year if they still owe a course.
+        </span>
       </label>
       <div class="adm-dialog__actions">
         <button type="button" class="adm-btn adm-btn--outline" (click)="ref.close()">Cancel</button>
@@ -64,10 +82,15 @@ export interface IDepartmentDialogResult {
       </div>
     </form>
   `,
+  styles: `
+    .dep-hint { font-size: 0.75rem; font-weight: 400; color: #6b7280; }
+  `,
 })
 export class DepartmentDialog {
   readonly ref = inject(MatDialogRef<DepartmentDialog, IDepartmentDialogResult>);
   readonly department = inject<IDepartment | null>(MAT_DIALOG_DATA);
+  readonly levelChoices = LEVEL_COUNT_CHOICES;
+  readonly rangeLabel = levelRangeLabel;
 
   form = new FormGroup({
     name: new FormControl(this.department?.name ?? '', {
@@ -80,12 +103,18 @@ export class DepartmentDialog {
       nonNullable: true,
       validators: [Validators.required, Validators.maxLength(10)],
     }),
+    // Required, including when editing an older department that has none:
+    // the rollover, graduation and school fees all read it.
+    levelCount: new FormControl<number | null>(this.department?.levelCount ?? null, {
+      validators: [Validators.required],
+    }),
   });
 
   save(): void {
     if (this.form.invalid) return;
-    const { name, code } = this.form.getRawValue();
-    this.ref.close({ name: name.trim(), code: code.trim().toUpperCase() });
+    const { name, code, levelCount } = this.form.getRawValue();
+    if (levelCount === null) return;
+    this.ref.close({ name: name.trim(), code: code.trim().toUpperCase(), levelCount });
   }
 }
 
@@ -331,7 +360,11 @@ export class Departments implements OnInit {
       .afterClosed()
       .subscribe((result: IDepartmentDialogResult | undefined) => {
         if (!result) return;
-        this.api.updateDepartment(department._id, result).subscribe({
+        // Send the count only when it changed: the server re-checks it
+        // against students and curriculum, which a rename should not trip.
+        const { levelCount, ...rest } = result;
+        const body = levelCount === department.levelCount ? rest : result;
+        this.api.updateDepartment(department._id, body).subscribe({
           next: () => {
             this.toast.success('Department updated.');
             this.load();
@@ -340,6 +373,11 @@ export class Departments implements OnInit {
             this.toast.error(err?.error?.message ?? 'Could not update department.'),
         });
       });
+  }
+
+  /** "100 to 500 Level" for the table; null when Acheva has not set it. */
+  levelsLabel(department: IDepartment): string | null {
+    return department.levelCount ? levelRangeLabel(department.levelCount) : null;
   }
 
   /** Active option names, for the table. */

@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import { IAPIResponse } from '../models/api-response.model';
 import {
   IAdminInvite,
+  IAdminNotification,
   IAdminProfile,
   IBank,
   IReceiptPage,
@@ -163,7 +164,7 @@ export class AdminApiService {
 
   createDepartment(
     facultyId: string,
-    body: { name: string; code?: string },
+    body: { name: string; code?: string; levelCount: number },
   ): Observable<IAPIResponse<IDepartment>> {
     return this.http.post<IAPIResponse<IDepartment>>(
       `${this.base}/schools/faculties/${facultyId}/departments`,
@@ -173,7 +174,7 @@ export class AdminApiService {
 
   updateDepartment(
     id: string,
-    body: Partial<{ name: string; code: string; isActive: boolean }>,
+    body: Partial<{ name: string; code: string; levelCount: number; isActive: boolean }>,
   ): Observable<IAPIResponse<IDepartment>> {
     return this.http.patch<IAPIResponse<IDepartment>>(
       `${this.base}/schools/faculties/departments/${id}`,
@@ -474,5 +475,22 @@ export class AdminApiService {
       body,
       { params: new HttpParams().append('schoolId', schoolId) },
     );
+  }
+
+  // ── Notifications (the header bell) ───────────────────────────────────────
+
+  notifications(): Observable<IAPIResponse<IAdminNotification[]>> {
+    return this.http.get<IAPIResponse<IAdminNotification[]>>(`${this.base}/notifications`);
+  }
+
+  markNotificationRead(id: string): Observable<IAPIResponse<IAdminNotification>> {
+    return this.http.patch<IAPIResponse<IAdminNotification>>(
+      `${this.base}/notifications/${id}/read`,
+      {},
+    );
+  }
+
+  markAllNotificationsRead(): Observable<IAPIResponse<number>> {
+    return this.http.patch<IAPIResponse<number>>(`${this.base}/notifications/read-all`, {});
   }
 }

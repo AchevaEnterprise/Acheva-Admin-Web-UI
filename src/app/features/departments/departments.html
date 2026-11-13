@@ -41,19 +41,33 @@
   </div>
 
   @if (loading()) {
-    <app-skeleton-table [cols]="4" [rows]="6" />
+    <app-skeleton-table [cols]="6" [rows]="6" />
   } @else if (departments().length === 0) {
     <p class="adm-empty">No departments in this faculty yet.</p>
   } @else {
     <table class="adm-table">
       <thead>
-        <tr><th>Name</th><th>Code</th><th>Options</th><th>Status</th><th>Action</th></tr>
+        <tr><th>Name</th><th>Code</th><th>Levels</th><th>Options</th><th>Status</th><th>Action</th></tr>
       </thead>
       <tbody>
         @for (department of departments(); track department._id) {
           <tr>
             <td class="fw-600">{{ department.name }}</td>
             <td>{{ department.code || '—' }}</td>
+            <td>
+              @if (levelsLabel(department); as label) {
+                {{ label }}
+              } @else {
+                <button
+                  type="button"
+                  class="adm-link-btn"
+                  [attr.aria-label]="'Set the levels for ' + department.name"
+                  (click)="edit(department)"
+                >
+                  Set levels
+                </button>
+              }
+            </td>
             <td>
               <div class="adm-chip-row">
                 @for (name of activeOptions().get(department._id) ?? []; track name) {

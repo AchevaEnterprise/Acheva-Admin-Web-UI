@@ -944,6 +944,14 @@ body {
   }
 }
 
+/* The amount in words, under its box — easier to catch a missing zero. */
+.sf-words {
+  margin: 4px 2px 0;
+  color: #6b7280;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
 .sf-foot {
   position: sticky;
   bottom: 0;

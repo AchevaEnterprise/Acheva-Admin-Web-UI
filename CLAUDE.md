@@ -80,7 +80,42 @@ reply reaches the student with no reload.
   tab); Verify, or Reject with a reason the student is shown — a rejected
   receipt stops counting toward their fees. This is the manual check until
   the AI one (reading the Remita QR code) exists.
+- **Typing a fee** (2026-11-11): the column is "School Fee Amount" (was
+  "Department fee"); the boxes are text inputs that add commas as you type,
+  keeping the caret after the digit it followed, and read the amount back in
+  words beneath — `core/money-input.ts` (specced). `toKobo` ignores commas, so
+  saving is unchanged.
 - Covered in browsers by `npm run test:school-fees-ui` in `Acheva-WEB-UI`.
+
+## Invite page & Acheva-only admins (2026-11-11)
+
+- `/register` (`features/auth/register/`) — the invite page, redesigned on the
+  sign-in page's split layout (`styleUrls: ['../login/login.scss',
+  './register.scss']`). It had been unstyled since the login redesign deleted
+  the `login-card` classes it used. The invited address is a read-only card
+  (the invite is bound to it); the password rules tick in brand blue as they
+  are met (the server's `IsStrongPassword` defaults, lower case included); no
+  token → an explanation and a way to sign in.
+- **Admins must be on an Acheva domain** — `core/acheva-email.ts` mirrors the
+  backend rule. The invite dialog refuses another domain inline; an invite
+  link for one (sent before the rule) says so up front and offers no form.
+  The server is what holds it.
+
+## Department levels, menu order, the bell (2026-11-11)
+
+- **Create/Edit Department asks for the number of levels** (1–6, required —
+  `core/department-levels.ts`); the table has a **Levels** column ("Set
+  levels" on older departments). Editing sends the count only when it
+  changed, so a rename never trips the server's "students above that level"
+  check. The **curriculum page's level buttons and the course dialog's
+  level list follow the chosen department** (`levelsFor`); departments
+  without a count keep 100–500.
+- **Menu order**: Schools → Faculty → Department → Courses (the order they
+  are set up in).
+- **The header bell is real** (`layout/notification-bell.ts`): polls
+  `GET /notifications` every minute, unread count in brand blue, a panel
+  with mark-one / mark-all read. First use: a Head changing their dues
+  total notifies every admin.
 
 ## Notes
 

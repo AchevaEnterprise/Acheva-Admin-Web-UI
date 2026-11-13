@@ -136,7 +136,7 @@
         <p class="acva-caption text-neutral-500 m-0">
           {{ feeCount() }} set across {{ current.departments.length }} departments.
           An extra-year student pays their department’s final-level fee. An option
-          left blank pays the department fee.
+          left blank pays the School Fee Amount.
         </p>
       </div>
       <input
@@ -171,7 +171,7 @@
             <thead>
               <tr>
                 <th>Level</th>
-                <th>Department fee</th>
+                <th>School Fee Amount</th>
                 @for (option of department.options; track option._id) {
                   <th>{{ option.name }}{{ option.isActive ? '' : ' (off)' }}</th>
                 }
@@ -185,31 +185,37 @@
                     <div class="sf-money" [class.sf-money--locked]="isLocked(department._id, level, null)">
                       <span>₦</span>
                       <input
-                        type="number"
-                        min="0"
-                        step="0.01"
+                        type="text"
+                        inputmode="decimal"
+                        autocomplete="off"
                         [attr.aria-label]="department.name + ' ' + level + ' Level fee'"
                         [value]="amountFor(department._id, level, null)"
                         [readOnly]="isLocked(department._id, level, null)"
-                        (input)="setAmount(department._id, level, null, $any($event.target).value)"
+                        (input)="onAmountInput($event, department._id, level, null)"
                       />
                     </div>
+                    @if (wordsFor(department._id, level, null); as words) {
+                      <p class="sf-words">{{ words }}</p>
+                    }
                   </td>
                   @for (option of department.options; track option._id) {
                     <td>
                       <div class="sf-money" [class.sf-money--locked]="isLocked(department._id, level, option._id)">
                         <span>₦</span>
                         <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          placeholder="Department fee"
+                          type="text"
+                          inputmode="decimal"
+                          autocomplete="off"
+                          placeholder="School Fee Amount"
                           [attr.aria-label]="department.name + ' ' + level + ' Level ' + option.name + ' fee'"
                           [value]="amountFor(department._id, level, option._id)"
                           [readOnly]="isLocked(department._id, level, option._id)"
-                          (input)="setAmount(department._id, level, option._id, $any($event.target).value)"
+                          (input)="onAmountInput($event, department._id, level, option._id)"
                         />
                       </div>
+                      @if (wordsFor(department._id, level, option._id); as words) {
+                        <p class="sf-words">{{ words }}</p>
+                      }
                     </td>
                   }
                 </tr>

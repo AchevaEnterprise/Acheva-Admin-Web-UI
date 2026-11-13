@@ -57,6 +57,8 @@ export interface IDepartment {
   readonly faculty: string;
   readonly isActive?: boolean;
   readonly options?: readonly IDepartmentOption[];
+  /** How many levels the programme runs (5 → 100 to 500). Null on older departments. */
+  readonly levelCount?: number | null;
 }
 
 // ── School fees (2026-11-09) ────────────────────────────────────────────────
@@ -436,4 +438,19 @@ export interface ITicketForm {
   readonly reporterName: string | null;
   readonly reporterEmail: string | null;
   readonly assignee: string | null;
+}
+
+// ── Notifications (the header bell, 2026-11-11) ──────────────────────────────
+
+/**
+ * A notice addressed to this admin — today, a Head changing their department's
+ * dues total. Shares the platform's `notifications` collection.
+ */
+export interface IAdminNotification {
+  readonly _id: string;
+  readonly title: string;
+  readonly message: string;
+  readonly status: 'UNREAD' | 'READ';
+  readonly createdAt: string;
+  readonly meta?: { readonly type?: string } | null;
 }
