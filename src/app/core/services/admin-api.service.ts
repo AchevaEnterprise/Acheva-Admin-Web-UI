@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import { IAPIResponse } from '../models/api-response.model';
 import {
   IAdminInvite,
+  IAdminNotification,
   IAdminProfile,
   IBank,
   IReceiptPage,
@@ -14,6 +15,10 @@ import {
   ISchoolFeeAccount,
   ISchoolFeePlanView,
   ICreatedInvite,
+  ICreatedManagementInvite,
+  IManagementAccountRow,
+  IManagementInviteRow,
+  ManagementOffice,
   ICreateCoursePayload,
   ICurriculumImportReport,
   ICurriculumRow,
@@ -103,6 +108,40 @@ export class AdminApiService {
     );
   }
 
+  // ── The management portal: DVC and Exams & Records (2026-11-13) ─────────
+
+  managementAccounts(
+    school: string,
+  ): Observable<IAPIResponse<{ accounts: IManagementAccountRow[]; invites: IManagementInviteRow[] }>> {
+    return this.http.get<
+      IAPIResponse<{ accounts: IManagementAccountRow[]; invites: IManagementInviteRow[] }>
+    >(`${this.base}/management/admin/accounts`, { params: { school } });
+  }
+
+  inviteManagement(body: {
+    school: string;
+    office: ManagementOffice;
+    email: string;
+  }): Observable<IAPIResponse<ICreatedManagementInvite>> {
+    return this.http.post<IAPIResponse<ICreatedManagementInvite>>(
+      `${this.base}/management/admin/invites`,
+      body,
+    );
+  }
+
+  revokeManagementInvite(id: string): Observable<IAPIResponse<{ revoked: boolean }>> {
+    return this.http.delete<IAPIResponse<{ revoked: boolean }>>(
+      `${this.base}/management/admin/invites/${id}`,
+    );
+  }
+
+  setManagementActive(id: string, active: boolean): Observable<IAPIResponse<unknown>> {
+    return this.http.patch<IAPIResponse<unknown>>(
+      `${this.base}/management/admin/accounts/${id}/active`,
+      { active },
+    );
+  }
+
   // ── Schools ───────────────────────────────────────────────────────────────
 
   schools(): Observable<IAPIResponse<ISchool[]>> {
@@ -163,7 +202,7 @@ export class AdminApiService {
 
   createDepartment(
     facultyId: string,
-    body: { name: string; code?: string },
+    body: { name: string; code?: string; levelCount: number },
   ): Observable<IAPIResponse<IDepartment>> {
     return this.http.post<IAPIResponse<IDepartment>>(
       `${this.base}/schools/faculties/${facultyId}/departments`,
@@ -173,7 +212,7 @@ export class AdminApiService {
 
   updateDepartment(
     id: string,
-    body: Partial<{ name: string; code: string; isActive: boolean }>,
+    body: Partial<{ name: string; code: string; levelCount: number; isActive: boolean }>,
   ): Observable<IAPIResponse<IDepartment>> {
     return this.http.patch<IAPIResponse<IDepartment>>(
       `${this.base}/schools/faculties/departments/${id}`,
@@ -474,5 +513,22 @@ export class AdminApiService {
       body,
       { params: new HttpParams().append('schoolId', schoolId) },
     );
+  }
+
+  // ── Notifications (the header bell) ───────────────────────────────────────
+
+  notifications(): Observable<IAPIResponse<IAdminNotification[]>> {
+    return this.http.get<IAPIResponse<IAdminNotification[]>>(`${this.base}/notifications`);
+  }
+
+  markNotificationRead(id: string): Observable<IAPIResponse<IAdminNotification>> {
+    return this.http.patch<IAPIResponse<IAdminNotification>>(
+      `${this.base}/notifications/${id}/read`,
+      {},
+    );
+  }
+
+  markAllNotificationsRead(): Observable<IAPIResponse<number>> {
+    return this.http.patch<IAPIResponse<number>>(`${this.base}/notifications/read-all`, {});
   }
 }

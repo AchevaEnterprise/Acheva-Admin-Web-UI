@@ -1,0 +1,169 @@
+/* Shares the sign-in page's shell (login.scss); these are the invite page's own parts.
+   Brand blue #2793FF on #77BBFF tints, nothing heavier than weight 500. */
+
+// login.scss sets 600 on the button; this page keeps to the 500 ceiling.
+.login-form .login-form__submit {
+  font-weight: 500;
+}
+
+.reg-pill {
+  align-self: flex-start;
+  margin-bottom: 4px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgb(119 187 255 / 20%);
+  color: #2793ff;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* The address the invite was issued to — read-only, so it is a card, not an input. */
+.reg-invite {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid rgb(119 187 255 / 50%);
+  border-radius: 12px;
+  background: rgb(119 187 255 / 12%);
+
+  &__icon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #fff;
+
+    img { width: 18px; height: 18px; }
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #2793ff;
+  }
+
+  &__email {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: #1f2937;
+    overflow-wrap: anywhere;
+  }
+
+  &--refused {
+    border-color: rgb(216 49 91 / 35%);
+    background: rgb(216 49 91 / 5%);
+
+    .reg-invite__label { color: #d8315b; }
+  }
+}
+
+// minmax(0, …): an input's intrinsic width would otherwise push the row
+// wider than the fields below it.
+.reg-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+
+  .login-field { min-width: 0; }
+}
+
+.reg-error {
+  font-size: 0.8125rem;
+  color: #d8315b;
+}
+
+/* Each rule fills in brand blue as the password meets it. */
+.reg-rules {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+  margin: -8px 0 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8125rem;
+    color: #6b7280;
+    transition: color 0.15s;
+  }
+
+  &__dot {
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    border: 1.5px solid #d2d1d1;
+    border-radius: 50%;
+    color: transparent;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  li.is-met {
+    color: #1f2937;
+
+    .reg-rules__dot {
+      border-color: #2793ff;
+      background: #2793ff;
+      color: #fff;
+    }
+  }
+}
+
+.reg-foot {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+
+  a {
+    color: #2793ff;
+    font-weight: 500;
+    text-decoration: none;
+
+    &:hover { text-decoration: underline; }
+  }
+}
+
+/* No invite in the link. */
+.reg-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+
+  &__icon {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgb(119 187 255 / 20%);
+
+    img { width: 26px; height: 26px; }
+  }
+}
+
+.reg-link-btn {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+}
+
+@media (max-width: 480px) {
+  .reg-row,
+  .reg-rules { grid-template-columns: 1fr; }
+}

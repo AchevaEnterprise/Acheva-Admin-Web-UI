@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   OnInit,
   signal,
@@ -20,7 +21,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
 import { finalize } from 'rxjs';
-import { LEVELS, SEMESTERS } from '../../core/constants';
+import { SEMESTERS } from '../../core/constants';
+import { levelsFor } from '../../core/department-levels';
 import {
   ICurriculumImportReport,
   ICurriculumRow,
@@ -94,7 +96,7 @@ interface ICourseDialogContext {
       <label>
         Department
         <mat-form-field appearance="outline" class="adm-mat">
-          <mat-select formControlName="department" placeholder="Choose a department">
+          <mat-select formControlName="department" placeholder="Choose a department" (selectionChange)="onDepartment()">
             @for (department of departments(); track department._id) {
               <mat-option [value]="department._id">{{ department.name }}</mat-option>
             }
@@ -106,7 +108,7 @@ interface ICourseDialogContext {
         Level
         <mat-form-field appearance="outline" class="adm-mat">
           <mat-select formControlName="level" placeholder="Choose a Level">
-            @for (level of levels; track level) {
+            @for (level of levels(); track level) {
               <mat-option [value]="level">{{ level }}</mat-option>
             }
           </mat-select>
@@ -202,9 +204,13 @@ export class CourseDialog {
   private readonly api = inject(AdminApiService);
 
   readonly semesters = SEMESTERS;
-  readonly levels = LEVELS;
   faculties = signal<IFaculty[]>([]);
   departments = signal<IDepartment[]>([]);
+  private readonly departmentId = signal('');
+  /** The chosen department's levels — a 4-level programme offers no 500. */
+  readonly levels = computed(() =>
+    levelsFor(this.departments().find((d) => d._id === this.departmentId())),
+  );
 
   form = new FormGroup({
     semester: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
@@ -235,9 +241,17 @@ export class CourseDialog {
     }
   }
 
+  onDepartment(): void {
+    this.departmentId.set(this.form.controls.department.value);
+    if (!this.levels().includes(this.form.controls.level.value)) {
+      this.form.patchValue({ level: '' });
+    }
+  }
+
   onFaculty(): void {
     const facultyId = this.form.controls.faculty.value;
     this.form.patchValue({ department: '' });
+    this.departmentId.set('');
     if (facultyId) {
       this.api.departments(facultyId).subscribe({
         next: (resp) => this.departments.set(resp.data ?? []),
@@ -272,7 +286,6 @@ export class Courses implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly dialog = inject(MatDialog);
 
-  readonly levels = LEVELS;
   readonly semesters = SEMESTERS;
 
   schools = signal<ISchool[]>([]);
@@ -288,6 +301,10 @@ export class Courses implements OnInit {
   selectedDepartmentId = signal('');
   selectedLevel = signal<string>('100');
   selectedSemester = signal<string>('1ST SEMESTER');
+  /** The selected department's levels — its own count, else 100 to 500. */
+  readonly levels = computed(() =>
+    levelsFor(this.departments().find((d) => d._id === this.selectedDepartmentId())),
+  );
   /** The selected block's minimum unit load (override or the global 15). */
   blockMinUnits = signal<number>(15);
   savingBlockMin = signal(false);
@@ -363,6 +380,8 @@ export class Courses implements OnInit {
 
   onDepartmentChange(departmentId: string): void {
     this.selectedDepartmentId.set(departmentId);
+    // A 4-level department has no 500 Level to stay on.
+    if (!this.levels().includes(this.selectedLevel())) this.selectedLevel.set('100');
     this.load();
   }
 

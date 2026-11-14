@@ -57,6 +57,8 @@ export interface IDepartment {
   readonly faculty: string;
   readonly isActive?: boolean;
   readonly options?: readonly IDepartmentOption[];
+  /** How many levels the programme runs (5 → 100 to 500). Null on older departments. */
+  readonly levelCount?: number | null;
 }
 
 // ── School fees (2026-11-09) ────────────────────────────────────────────────
@@ -436,4 +438,55 @@ export interface ITicketForm {
   readonly reporterName: string | null;
   readonly reporterEmail: string | null;
   readonly assignee: string | null;
+}
+
+// ── Notifications (the header bell, 2026-11-11) ──────────────────────────────
+
+/**
+ * A notice addressed to this admin — today, a Head changing their department's
+ * dues total. Shares the platform's `notifications` collection.
+ */
+export interface IAdminNotification {
+  readonly _id: string;
+  readonly title: string;
+  readonly message: string;
+  readonly status: 'UNREAD' | 'READ';
+  readonly createdAt: string;
+  readonly meta?: { readonly type?: string } | null;
+}
+
+// ── The management portal (DVC, Exams & Records — 2026-11-13) ──────────────
+
+export type ManagementOffice = 'DVC' | 'EXAMS_RECORDS';
+
+export interface IManagementAccountRow {
+  readonly _id: string;
+  readonly email: string;
+  readonly titles?: string[];
+  readonly firstname: string;
+  readonly lastname: string;
+  readonly office: ManagementOffice;
+  readonly isTeamHead: boolean;
+  readonly isActive: boolean;
+  /** "DVC" · "Head, Exams & Records" · "Exams & Records" */
+  readonly officeTitle: string;
+  readonly createdAt: string;
+}
+
+export interface IManagementInviteRow {
+  readonly _id: string;
+  readonly email: string;
+  readonly office: ManagementOffice;
+  readonly isTeamHead: boolean;
+  readonly officeTitle: string;
+  readonly expiresAt: string;
+  readonly createdAt: string;
+}
+
+export interface ICreatedManagementInvite {
+  readonly _id: string;
+  readonly email: string;
+  readonly officeTitle: string;
+  readonly expiresAt: string;
+  readonly inviteLink: string;
 }

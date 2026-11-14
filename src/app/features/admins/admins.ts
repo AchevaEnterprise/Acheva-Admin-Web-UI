@@ -21,6 +21,7 @@ import {
   IAdminProfile,
   ICreatedInvite,
 } from '../../core/models/admin.model';
+import { achevaEmailValidator } from '../../core/acheva-email';
 import { AdminApiService } from '../../core/services/admin-api.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ConfirmDialog, IConfirmData } from '../../shared/confirm-dialog';
@@ -43,6 +44,11 @@ import { ConfirmDialog, IConfirmData } from '../../shared/confirm-dialog';
         <label>
           Email
           <input class="adm-input" [formControl]="email" placeholder="colleague@acheva.app" />
+          @if (email.hasError('achevaEmail')) {
+            <span class="invite-error">Only an &#64;acheva.app address can be invited.</span>
+          } @else {
+            <span class="invite-hint">Admins sign in with their &#64;acheva.app address.</span>
+          }
         </label>
         <div class="adm-dialog__actions">
           <button type="button" class="adm-btn adm-btn--outline" (click)="ref.close(false)">Cancel</button>
@@ -74,6 +80,9 @@ import { ConfirmDialog, IConfirmData } from '../../shared/confirm-dialog';
       word-break: break-all;
       font-size: 0.75rem;
     }
+    .invite-hint,
+    .invite-error { font-size: 0.75rem; font-weight: 400; color: #6b7280; }
+    .invite-error { color: #d8315b; }
   `,
 })
 export class InviteDialog {
@@ -84,7 +93,7 @@ export class InviteDialog {
 
   email = new FormControl(this.initialEmail ?? '', {
     nonNullable: true,
-    validators: [Validators.required, Validators.email],
+    validators: [Validators.required, Validators.email, achevaEmailValidator],
   });
   sending = signal(false);
   created = signal<ICreatedInvite | null>(null);

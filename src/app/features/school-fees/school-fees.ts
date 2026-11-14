@@ -30,6 +30,7 @@ import {
   ISchoolFeePlanView,
 } from '../../core/models/admin.model';
 import { formatNaira, toKobo, toNaira } from '../../core/naira';
+import { caretAfterFormat, formatNairaInput, nairaInWords } from '../../core/money-input';
 import { AdminApiService } from '../../core/services/admin-api.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Skeleton } from '../../shared/skeleton';
@@ -263,7 +264,7 @@ export class SchoolFees implements OnInit {
     this.dueDates.set(dates.length ? dates : ['', '']);
     const amounts: Record<string, string> = {};
     for (const fee of view.fees) {
-      amounts[feeKey(fee.department, fee.level, fee.option)] = String(toNaira(fee.amountKobo));
+      amounts[feeKey(fee.department, fee.level, fee.option)] = formatNairaInput(String(toNaira(fee.amountKobo)));
     }
     this.amounts.set(amounts);
     this.dirty.set(false);
@@ -291,6 +292,28 @@ export class SchoolFees implements OnInit {
   setAmount(department: string, level: string, option: string | null, value: string): void {
     this.amounts.update((amounts) => ({ ...amounts, [feeKey(department, level, option)]: value }));
     this.dirty.set(true);
+  }
+
+  /**
+   * Commas as the fee is typed (2026-11-11), with the caret kept after the
+   * digit it followed. `toKobo` ignores the commas, so nothing downstream
+   * changes.
+   */
+  onAmountInput(event: Event, department: string, level: string, option: string | null): void {
+    const input = event.target as HTMLInputElement;
+    const caret = input.selectionStart ?? input.value.length;
+    const formatted = formatNairaInput(input.value);
+    if (formatted !== input.value) {
+      const next = caretAfterFormat(input.value, caret, formatted);
+      input.value = formatted;
+      input.setSelectionRange(next, next);
+    }
+    this.setAmount(department, level, option, formatted);
+  }
+
+  /** The amount read back in words beneath its box — empty while blank. */
+  wordsFor(department: string, level: string, option: string | null): string {
+    return nairaInWords(toKobo(this.amountFor(department, level, option)));
   }
 
   /** Copy a department's 100-level fee to every level still blank. */
