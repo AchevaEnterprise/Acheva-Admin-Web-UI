@@ -15,6 +15,10 @@ import {
   ISchoolFeeAccount,
   ISchoolFeePlanView,
   ICreatedInvite,
+  ICreatedManagementInvite,
+  IManagementAccountRow,
+  IManagementInviteRow,
+  ManagementOffice,
   ICreateCoursePayload,
   ICurriculumImportReport,
   ICurriculumRow,
@@ -101,6 +105,40 @@ export class AdminApiService {
   schoolsWithCounts(): Observable<IAPIResponse<ISchool[]>> {
     return this.http.get<IAPIResponse<ISchool[]>>(
       `${this.base}/admins/overview/schools`,
+    );
+  }
+
+  // ── The management portal: DVC and Exams & Records (2026-11-13) ─────────
+
+  managementAccounts(
+    school: string,
+  ): Observable<IAPIResponse<{ accounts: IManagementAccountRow[]; invites: IManagementInviteRow[] }>> {
+    return this.http.get<
+      IAPIResponse<{ accounts: IManagementAccountRow[]; invites: IManagementInviteRow[] }>
+    >(`${this.base}/management/admin/accounts`, { params: { school } });
+  }
+
+  inviteManagement(body: {
+    school: string;
+    office: ManagementOffice;
+    email: string;
+  }): Observable<IAPIResponse<ICreatedManagementInvite>> {
+    return this.http.post<IAPIResponse<ICreatedManagementInvite>>(
+      `${this.base}/management/admin/invites`,
+      body,
+    );
+  }
+
+  revokeManagementInvite(id: string): Observable<IAPIResponse<{ revoked: boolean }>> {
+    return this.http.delete<IAPIResponse<{ revoked: boolean }>>(
+      `${this.base}/management/admin/invites/${id}`,
+    );
+  }
+
+  setManagementActive(id: string, active: boolean): Observable<IAPIResponse<unknown>> {
+    return this.http.patch<IAPIResponse<unknown>>(
+      `${this.base}/management/admin/accounts/${id}/active`,
+      { active },
     );
   }
 

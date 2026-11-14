@@ -44,6 +44,12 @@ export const routes: Routes = [
           import('./features/courses/courses').then((m) => m.Courses),
       },
       {
+        // The DVC and Exams & Records — management.acheva.app (2026-11-13).
+        path: 'management',
+        loadComponent: () =>
+          import('./features/management/management').then((m) => m.Management),
+      },
+      {
         path: 'admins',
         loadComponent: () =>
           import('./features/admins/admins').then((m) => m.Admins),

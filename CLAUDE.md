@@ -117,6 +117,18 @@ reply reaches the student with no reload.
   with mark-one / mark-all read. First use: a Head changing their dues
   total notifies every admin.
 
+## Management — the DVC and Exams & Records (2026-11-13)
+
+`/management` (`features/management/management.ts`): pick a university, then
+invite its **DVC** (one per university) and its **head of Exams & Records**
+(the head adds the rest of the team from the management portal). Shows the
+invite link to copy, everyone with a management account (deactivate /
+reactivate — deactivating signs them out at once) and invites not yet
+accepted (withdraw). Invite buttons wait for the university to load — a
+click before then used to send an invite with no school. The console's
+shared `.adm-btn` and table headers are weight 600, so this page sets them to
+500 for itself. Backend `/management/admin/*`.
+
 ## Notes
 
 - There is **no `lint` script** in this repo; `ng build` is the gate.

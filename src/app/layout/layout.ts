@@ -132,6 +132,13 @@ export class Layout {
       inactiveIcon: 'icons/menu/students-inactive.svg',
     },
     {
+      // A university's DVC and head of Exams & Records (2026-11-13).
+      label: 'Management',
+      route: '/management',
+      activeIcon: 'icons/menu/result-chart-active.svg',
+      inactiveIcon: 'icons/menu/result-chart-inactive.svg',
+    },
+    {
       label: 'Admins',
       route: '/admins',
       activeIcon: 'icons/menu/dues-management-active.svg',

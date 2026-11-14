@@ -454,3 +454,39 @@ export interface IAdminNotification {
   readonly createdAt: string;
   readonly meta?: { readonly type?: string } | null;
 }
+
+// ── The management portal (DVC, Exams & Records — 2026-11-13) ──────────────
+
+export type ManagementOffice = 'DVC' | 'EXAMS_RECORDS';
+
+export interface IManagementAccountRow {
+  readonly _id: string;
+  readonly email: string;
+  readonly titles?: string[];
+  readonly firstname: string;
+  readonly lastname: string;
+  readonly office: ManagementOffice;
+  readonly isTeamHead: boolean;
+  readonly isActive: boolean;
+  /** "DVC" · "Head, Exams & Records" · "Exams & Records" */
+  readonly officeTitle: string;
+  readonly createdAt: string;
+}
+
+export interface IManagementInviteRow {
+  readonly _id: string;
+  readonly email: string;
+  readonly office: ManagementOffice;
+  readonly isTeamHead: boolean;
+  readonly officeTitle: string;
+  readonly expiresAt: string;
+  readonly createdAt: string;
+}
+
+export interface ICreatedManagementInvite {
+  readonly _id: string;
+  readonly email: string;
+  readonly officeTitle: string;
+  readonly expiresAt: string;
+  readonly inviteLink: string;
+}
